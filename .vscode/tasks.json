@@ -1,0 +1,65 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Assemble Debug APK",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": ["/c", "gradlew.bat", "assembleDebug"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Install Debug APK",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": ["/c", "adb", "install", "-r", "composeApp/build/outputs/apk/debug/composeApp-debug.apk"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Launch App",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": ["/c", "adb", "shell", "am", "start", "-n", "dev.quanghuy.mpcareal/.MainActivity"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build, Install and Launch",
+            "dependsOn": ["Assemble Debug APK", "Install Debug APK", "Launch App"],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}
