@@ -23,6 +23,9 @@ in your IDE’s toolbar or build it directly from the terminal:
   .\gradlew.bat :composeApp:assembleDebug
   ```
 
+````
+java -jar "C:\Users\ADMIN\Downloads\ktfmt-0.59-with-dependencies.jar" composeApp\src\androidMain\kotlin\dev\quanghuy\mpcareal\*.kt
+```
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
