@@ -11,13 +11,31 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.text.style.TextOverflow
+import coil3.compose.AsyncImage
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -37,6 +55,42 @@ import mpcareal.composeapp.generated.resources.Res
 import mpcareal.composeapp.generated.resources.compose_multiplatform
 
 import kotlinx.coroutines.launch
+
+data class Album(val title: String, val artist: String, val imageUrl: String, val genre: String)
+
+private val sampleAlbums = listOf(
+    Album(
+        title = "Nữ Thần Mất Trăng (Mônangel)",
+        artist = "Bùi Lan Hương",
+        imageUrl = "https://contents.quanghuy.dev/118CD291-17C4-4E0E-B51C-D8504A57E4D5_sk1.jpeg",
+        genre = "Pop"
+    ),
+    Album(
+        title = "The Human Era (Original Soundtrack)",
+        artist = "Epic Mountain",
+        imageUrl = "https://contents.quanghuy.dev/35F87834-A50F-40FB-9F76-E994D99D2656_sk1.jpeg",
+        genre = "Soundtrack"
+    ),
+    Album(
+        title = "Thiên Thần Sa Ngã",
+        artist = "Bùi Lan Hương",
+        imageUrl = "https://contents.quanghuy.dev/60080A59-43AF-448E-99C1-85887045E5DC_sk1.jpeg",
+        genre = "Pop"
+    ),
+    Album(
+        title = "Lust for Life",
+        artist = "Lana Del Rey",
+        imageUrl = "https://contents.quanghuy.dev/73494CD3-B6D7-4931-8978-CD3E3C6EC7EF_sk1.jpeg",
+        genre = "Pop"
+    ),
+    Album(
+        title = "Firewatch (Original Soundtrack)",
+        artist = "Chris Remo",
+        imageUrl = "https://contents.quanghuy.dev/79EEE411-BF3C-4F63-BD5E-39C673FFA737_sk1.jpeg",
+        genre = "Soundtrack"
+    ),
+)
+
 
 @Composable
 @Preview
@@ -220,13 +274,54 @@ fun SongsTab(scrollBehavior: TopAppBarScrollBehavior) {
 
 @Composable
 fun AlbumsTab(scrollBehavior: TopAppBarScrollBehavior) {
-    LazyColumn(
+    val albums = remember { List(50) { sampleAlbums[it % sampleAlbums.size] } }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(20) { index ->
-            Text("Album $index", modifier = Modifier.padding(16.dp))
+        items(albums) { album ->
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable { /* TODO: play album */ },
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column {
+                    AsyncImage(
+                        model = album.imageUrl,
+                        contentDescription = album.title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium),
+                        contentScale = ContentScale.Crop
+                    )
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = album.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = album.artist,
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
         }
     }
 }
