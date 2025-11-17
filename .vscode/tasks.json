@@ -60,6 +60,22 @@
                 "focus": false,
                 "panel": "shared"
             }
-        }
+        },
+        {
+            "label": "Format Code",
+            "type": "shell",
+            "command": "cmd.exe",
+            "args": ["/c", "java", "-jar", "jars\\ktfmt-0.59-with-dependencies.jar", "--kotlinlang-style", "-r", "src", "composeApp\\src"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
     ]
 }

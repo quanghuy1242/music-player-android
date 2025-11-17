@@ -80,36 +80,36 @@ data class Track(
 )
 
 class PlaybackViewModel : ViewModel() {
-  var currentTrack by mutableStateOf<Track?>(null)
-    private set
+    var currentTrack by mutableStateOf<Track?>(null)
+        private set
 
-  var isPlaying by mutableStateOf(false)
-    private set
+    var isPlaying by mutableStateOf(false)
+        private set
 
-  var currentPosition by mutableStateOf(0L)
-    private set
+    var currentPosition by mutableStateOf(0L)
+        private set
 
-  fun playTrack(track: Track) {
-    currentTrack = track
-    isPlaying = true
-    currentPosition = 0L
-  }
+    fun playTrack(track: Track) {
+        currentTrack = track
+        isPlaying = true
+        currentPosition = 0L
+    }
 
-  fun togglePlayPause() {
-    isPlaying = !isPlaying
-  }
+    fun togglePlayPause() {
+        isPlaying = !isPlaying
+    }
 
-  fun nextTrack() {
-    // In a real app, this would cycle through a playlist
-    isPlaying = false
-    currentPosition = 0L
-  }
+    fun nextTrack() {
+        // In a real app, this would cycle through a playlist
+        isPlaying = false
+        currentPosition = 0L
+    }
 
-  fun previousTrack() {
-    // In a real app, this would cycle through a playlist
-    isPlaying = false
-    currentPosition = 0L
-  }
+    fun previousTrack() {
+        // In a real app, this would cycle through a playlist
+        isPlaying = false
+        currentPosition = 0L
+    }
 }
 
 private val sampleTracks =
@@ -199,484 +199,493 @@ fun MediaPlaybackControlBar(
     onPrevious: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  val progress =
-      if (currentTrack != null) {
-        0.3f // Placeholder - in a real app, this would be (currentPosition / duration)
-      } else {
-        0f
-      }
-
-  if (currentTrack != null) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape =
-            MaterialTheme.shapes.extraSmall.copy(
-                bottomStart = CornerSize(0.dp),
-                bottomEnd = CornerSize(0.dp),
-            ),
-    ) {
-      Box {
-        // Progress indicator as top border
-        Box(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(2.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-          Box(
-              modifier =
-                  Modifier.fillMaxWidth(progress)
-                      .height(2.dp)
-                      .background(MaterialTheme.colorScheme.primary)
-          )
+    val progress =
+        if (currentTrack != null) {
+            0.3f // Placeholder - in a real app, this would be (currentPosition / duration)
+        } else {
+            0f
         }
 
-        // Main content
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    if (currentTrack != null) {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape =
+                MaterialTheme.shapes.extraSmall.copy(
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(0.dp),
+                ),
         ) {
-          // Album cover
-          AsyncImage(
-              model = currentTrack.imageUrl,
-              contentDescription = currentTrack.title,
-              modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
-              contentScale = ContentScale.Crop,
-          )
+            Box {
+                // Progress indicator as top border
+                Box(
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .height(2.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Box(
+                        modifier =
+                            Modifier.fillMaxWidth(progress)
+                                .height(2.dp)
+                                .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
 
-          Spacer(modifier = Modifier.width(12.dp))
+                // Main content
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // Album cover
+                    AsyncImage(
+                        model = currentTrack.imageUrl,
+                        contentDescription = currentTrack.title,
+                        modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                        contentScale = ContentScale.Crop,
+                    )
 
-          // Track info
-          Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = currentTrack.title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = currentTrack.artist,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-          }
+                    Spacer(modifier = Modifier.width(12.dp))
 
-          Spacer(modifier = Modifier.width(12.dp))
+                    // Track info
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = currentTrack.title,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = currentTrack.artist,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
 
-          // Playback controls
-          Row {
-            IconButton(onClick = onPrevious) {
-              Icon(
-                  imageVector = Icons.Filled.SkipPrevious,
-                  contentDescription = "Previous",
-                  modifier = Modifier.size(24.dp),
-              )
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // Playback controls
+                    Row {
+                        IconButton(onClick = onPrevious) {
+                            Icon(
+                                imageVector = Icons.Filled.SkipPrevious,
+                                contentDescription = "Previous",
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                        IconButton(
+                            onClick = onPlayPause,
+                            modifier =
+                                Modifier.size(44.dp)
+                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                        ) {
+                            Icon(
+                                imageVector =
+                                    if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                modifier = Modifier.size(28.dp),
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        }
+                        IconButton(onClick = onNext) {
+                            Icon(
+                                imageVector = Icons.Filled.SkipNext,
+                                contentDescription = "Next",
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    }
+                }
             }
-            IconButton(
-                onClick = onPlayPause,
-                modifier =
-                    Modifier.size(44.dp).background(MaterialTheme.colorScheme.primary, CircleShape),
-            ) {
-              Icon(
-                  imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                  contentDescription = if (isPlaying) "Pause" else "Play",
-                  modifier = Modifier.size(28.dp),
-                  tint = MaterialTheme.colorScheme.onPrimary,
-              )
-            }
-            IconButton(onClick = onNext) {
-              Icon(
-                  imageVector = Icons.Filled.SkipNext,
-                  contentDescription = "Next",
-                  modifier = Modifier.size(24.dp),
-              )
-            }
-          }
         }
-      }
     }
-  }
 }
 
 @Composable
 @Preview
 fun App() {
-  MaterialTheme {
-    val playbackViewModel: PlaybackViewModel = viewModel<PlaybackViewModel>()
-    val navItems =
-        listOf(
-            "Home" to Icons.Filled.Home,
-            "Library" to Icons.AutoMirrored.Filled.LibraryBooks,
-            "Personal" to Icons.Filled.Person,
-            "Settings" to Icons.Filled.Settings,
-        )
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    var previousIndex by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(selectedIndex) { previousIndex = selectedIndex }
-
-    // Initialize with a sample track for demonstration
-    LaunchedEffect(Unit) {
-      if (playbackViewModel.currentTrack == null) {
-        playbackViewModel.playTrack(sampleTracks.first())
-      }
-    }
-
-    Scaffold(
-        floatingActionButton = {
-          // ToggleFloatingActionButton with menu
-          var expanded by rememberSaveable { mutableStateOf(false) }
-          // FAB Menu options (uses Material3 FloatingActionButtonMenu API)
-          FloatingActionButtonMenu(
-              expanded,
-              {
-                ToggleFloatingActionButton(
-                    checked = expanded,
-                    onCheckedChange = { expanded = !expanded },
-                ) {
-                  Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
-                }
-              },
-              Modifier,
-              Alignment.End,
-          ) {
-            // Menu items: use 'icon' parameter (not leadingIcon)
-            FloatingActionButtonMenuItem(
-                onClick = { /* Handle shuffle action */ },
-                text = { Text("Shuffle and Play") },
-                icon = { Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle") },
+    MaterialTheme {
+        val playbackViewModel: PlaybackViewModel = viewModel<PlaybackViewModel>()
+        val navItems =
+            listOf(
+                "Home" to Icons.Filled.Home,
+                "Library" to Icons.AutoMirrored.Filled.LibraryBooks,
+                "Personal" to Icons.Filled.Person,
+                "Settings" to Icons.Filled.Settings,
             )
-            FloatingActionButtonMenuItem(
-                onClick = { /* Handle surprise action */ },
-                text = { Text("Surprise Me") },
-                icon = { Icon(Icons.Filled.AutoAwesome, contentDescription = "Surprise") },
-            )
-          }
-        },
-        bottomBar = {
-          Column {
-            MediaPlaybackControlBar(
-                currentTrack = playbackViewModel.currentTrack,
-                isPlaying = playbackViewModel.isPlaying,
-                onPlayPause = { playbackViewModel.togglePlayPause() },
-                onNext = { playbackViewModel.nextTrack() },
-                onPrevious = { playbackViewModel.previousTrack() },
-            )
+        var selectedIndex by remember { mutableIntStateOf(0) }
+        var previousIndex by remember { mutableIntStateOf(0) }
 
-            // Navigation bar
-            NavigationBar {
-              navItems.forEachIndexed { index, (label, icon) ->
-                NavigationBarItem(
-                    selected = selectedIndex == index,
-                    onClick = { selectedIndex = index },
-                    icon = { Icon(icon, contentDescription = label) },
-                    label = { Text(label) },
-                )
-              }
+        LaunchedEffect(selectedIndex) { previousIndex = selectedIndex }
+
+        // Initialize with a sample track for demonstration
+        LaunchedEffect(Unit) {
+            if (playbackViewModel.currentTrack == null) {
+                playbackViewModel.playTrack(sampleTracks.first())
             }
-          }
-        },
-    ) { paddingValues ->
-      Column(
-          modifier = Modifier.fillMaxSize().padding(paddingValues),
-          horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        AnimatedContent<Int>(
-            targetState = selectedIndex,
-            transitionSpec = {
-              if (targetState > initialState) {
-                // New screen from right, old to left with spring
-                slideInHorizontally(
-                    animationSpec = spring(stiffness = Spring.StiffnessLow),
-                    initialOffsetX = { width -> width },
-                ) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = spring(stiffness = Spring.StiffnessLow),
-                        targetOffsetX = { width -> -width },
-                    )
-              } else {
-                // New screen from left, old to right with spring
-                slideInHorizontally(
-                    animationSpec = spring(stiffness = Spring.StiffnessLow),
-                    initialOffsetX = { width -> -width },
-                ) togetherWith
-                    slideOutHorizontally(
-                        animationSpec = spring(stiffness = Spring.StiffnessLow),
-                        targetOffsetX = { width -> width },
-                    )
-              }
-            },
-            label = "ScreenTransition",
-        ) { index ->
-          when (index) {
-            0 -> HomeScreen(playbackViewModel)
-            1 -> LibraryScreen(playbackViewModel)
-            2 -> PersonalScreen()
-            3 -> SettingsScreen()
-          }
         }
-      }
+
+        Scaffold(
+            floatingActionButton = {
+                // ToggleFloatingActionButton with menu
+                var expanded by rememberSaveable { mutableStateOf(false) }
+                // FAB Menu options (uses Material3 FloatingActionButtonMenu API)
+                FloatingActionButtonMenu(
+                    expanded,
+                    {
+                        ToggleFloatingActionButton(
+                            checked = expanded,
+                            onCheckedChange = { expanded = !expanded },
+                        ) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                        }
+                    },
+                    Modifier,
+                    Alignment.End,
+                ) {
+                    // Menu items: use 'icon' parameter (not leadingIcon)
+                    FloatingActionButtonMenuItem(
+                        onClick = { /* Handle shuffle action */ },
+                        text = { Text("Shuffle and Play") },
+                        icon = { Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle") },
+                    )
+                    FloatingActionButtonMenuItem(
+                        onClick = { /* Handle surprise action */ },
+                        text = { Text("Surprise Me") },
+                        icon = { Icon(Icons.Filled.AutoAwesome, contentDescription = "Surprise") },
+                    )
+                }
+            },
+            bottomBar = {
+                Column {
+                    MediaPlaybackControlBar(
+                        currentTrack = playbackViewModel.currentTrack,
+                        isPlaying = playbackViewModel.isPlaying,
+                        onPlayPause = { playbackViewModel.togglePlayPause() },
+                        onNext = { playbackViewModel.nextTrack() },
+                        onPrevious = { playbackViewModel.previousTrack() },
+                    )
+
+                    // Navigation bar
+                    NavigationBar {
+                        navItems.forEachIndexed { index, (label, icon) ->
+                            NavigationBarItem(
+                                selected = selectedIndex == index,
+                                onClick = { selectedIndex = index },
+                                icon = { Icon(icon, contentDescription = label) },
+                                label = { Text(label) },
+                            )
+                        }
+                    }
+                }
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AnimatedContent<Int>(
+                    targetState = selectedIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            // New screen from right, old to left with spring
+                            slideInHorizontally(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                initialOffsetX = { width -> width },
+                            ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                    targetOffsetX = { width -> -width },
+                                )
+                        } else {
+                            // New screen from left, old to right with spring
+                            slideInHorizontally(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                initialOffsetX = { width -> -width },
+                            ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                    targetOffsetX = { width -> width },
+                                )
+                        }
+                    },
+                    label = "ScreenTransition",
+                ) { index ->
+                    when (index) {
+                        0 -> HomeScreen(playbackViewModel)
+                        1 -> LibraryScreen(playbackViewModel)
+                        2 -> PersonalScreen()
+                        3 -> SettingsScreen()
+                    }
+                }
+            }
+        }
     }
-  }
 }
 
 @Composable
 fun HomeScreen(playbackViewModel: PlaybackViewModel) {
-  var showContent by remember { mutableStateOf(false) }
-  Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    Text("Home Page", style = MaterialTheme.typography.headlineMedium)
-    Button(onClick = { showContent = !showContent }) {
-      Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
-      Text("Click me!!!")
+    var showContent by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Home Page", style = MaterialTheme.typography.headlineMedium)
+        Button(onClick = { showContent = !showContent }) {
+            Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
+            Text("Click me!!!")
+        }
+        AnimatedVisibility(showContent) {
+            val greeting = remember { Greeting().greet() }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(painterResource(Res.drawable.compose_multiplatform), null)
+                Text("Compose: $greeting")
+            }
+        }
     }
-    AnimatedVisibility(showContent) {
-      val greeting = remember { Greeting().greet() }
-      Column(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Image(painterResource(Res.drawable.compose_multiplatform), null)
-        Text("Compose: $greeting")
-      }
-    }
-  }
 }
 
 @Composable
 fun LibraryScreen(playbackViewModel: PlaybackViewModel) {
-  val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-  val pagerState = rememberPagerState { 3 }
-  val scope = rememberCoroutineScope()
-  val tabs = listOf("Songs", "Albums", "Artists")
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val pagerState = rememberPagerState { 3 }
+    val scope = rememberCoroutineScope()
+    val tabs = listOf("Songs", "Albums", "Artists")
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Library") },
-            actions = {
-              var expanded by remember { mutableStateOf(false) }
-              IconButton(onClick = { expanded = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
-              }
-              DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                DropdownMenuItem(text = { Text("Option 1") }, onClick = { expanded = false })
-                DropdownMenuItem(text = { Text("Option 2") }, onClick = { expanded = false })
-              }
-            },
-            scrollBehavior = scrollBehavior,
-            windowInsets = WindowInsets(0),
-        )
-      },
-      contentWindowInsets = WindowInsets(0),
-  ) { paddingValues ->
-    Column(modifier = Modifier.padding(paddingValues)) {
-      PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
-        tabs.forEachIndexed { index, title ->
-          Tab(
-              selected = pagerState.currentPage == index,
-              onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-              text = { Text(title) },
-          )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Library") },
+                actions = {
+                    var expanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Option 1") },
+                            onClick = { expanded = false },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Option 2") },
+                            onClick = { expanded = false },
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets(0),
+            )
+        },
+        contentWindowInsets = WindowInsets(0),
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
+            PrimaryTabRow(selectedTabIndex = pagerState.currentPage) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        text = { Text(title) },
+                    )
+                }
+            }
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                flingBehavior =
+                    PagerDefaults.flingBehavior(
+                        state = pagerState,
+                        snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
+                    ),
+            ) { page ->
+                when (page) {
+                    0 -> SongsTab(scrollBehavior, playbackViewModel)
+                    1 -> AlbumsTab(scrollBehavior, playbackViewModel)
+                    2 -> ArtistsTab(scrollBehavior)
+                }
+            }
         }
-      }
-      HorizontalPager(
-          state = pagerState,
-          modifier = Modifier.fillMaxSize(),
-          flingBehavior =
-              PagerDefaults.flingBehavior(
-                  state = pagerState,
-                  snapAnimationSpec = spring(stiffness = Spring.StiffnessLow),
-              ),
-      ) { page ->
-        when (page) {
-          0 -> SongsTab(scrollBehavior, playbackViewModel)
-          1 -> AlbumsTab(scrollBehavior, playbackViewModel)
-          2 -> ArtistsTab(scrollBehavior)
-        }
-      }
     }
-  }
 }
 
 @Composable
 fun SongsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: PlaybackViewModel) {
-  LazyColumn(
-      modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
-  ) {
-    items(20) { index -> Text("Song $index", modifier = Modifier.padding(16.dp)) }
-  }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) {
+        items(20) { index -> Text("Song $index", modifier = Modifier.padding(16.dp)) }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: PlaybackViewModel) {
-  val albums = remember { List(50) { sampleAlbums[it % sampleAlbums.size] } }
-  val scope = rememberCoroutineScope()
-  var selectedAlbum by remember { mutableStateOf<Album?>(null) }
-  var showBottomSheet by remember { mutableStateOf(false) }
-  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val albums = remember { List(50) { sampleAlbums[it % sampleAlbums.size] } }
+    val scope = rememberCoroutineScope()
+    var selectedAlbum by remember { mutableStateOf<Album?>(null) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-  // Modal Bottom Sheet
-  if (showBottomSheet && selectedAlbum != null) {
-    ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState) {
-      Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 16.dp),
-        ) {
-          AsyncImage(
-              model = selectedAlbum!!.imageUrl,
-              contentDescription = selectedAlbum!!.title,
-              modifier = Modifier.size(64.dp).clip(MaterialTheme.shapes.small),
-              contentScale = ContentScale.Crop,
-          )
-          Spacer(modifier = Modifier.width(16.dp))
-          Column {
-            Text(
-                text = selectedAlbum!!.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = selectedAlbum!!.artist,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
+    // Modal Bottom Sheet
+    if (showBottomSheet && selectedAlbum != null) {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                ) {
+                    AsyncImage(
+                        model = selectedAlbum!!.imageUrl,
+                        contentDescription = selectedAlbum!!.title,
+                        modifier = Modifier.size(64.dp).clip(MaterialTheme.shapes.small),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = selectedAlbum!!.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = selectedAlbum!!.artist,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        // Album Options with Icons
-        listOf(
-                "Play Album" to Icons.AutoMirrored.Filled.PlaylistAdd,
-                "Add to Favorites" to Icons.Default.Favorite,
-                "Share" to Icons.Default.Share,
-                "Download" to Icons.Default.Download,
-            )
-            .forEach { (option, icon) ->
-              Row(
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .clickable {
-                            scope.launch {
-                              sheetState.hide()
-                              showBottomSheet = false
-                            }
-                            // Handle option selection
-                          }
-                          .padding(vertical = 12.dp, horizontal = 8.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-              ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = option,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(text = option, fontSize = 16.sp)
-              }
+                // Album Options with Icons
+                listOf(
+                        "Play Album" to Icons.AutoMirrored.Filled.PlaylistAdd,
+                        "Add to Favorites" to Icons.Default.Favorite,
+                        "Share" to Icons.Default.Share,
+                        "Download" to Icons.Default.Download,
+                    )
+                    .forEach { (option, icon) ->
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .clickable {
+                                        scope.launch {
+                                            sheetState.hide()
+                                            showBottomSheet = false
+                                        }
+                                        // Handle option selection
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = option,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = option, fontSize = 16.sp)
+                        }
+                    }
             }
-      }
-    }
-  }
-
-  // Main Grid Content
-  LazyVerticalGrid(
-      columns = GridCells.Fixed(2),
-      modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
-      contentPadding = PaddingValues(8.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
-  ) {
-    items(albums) { album ->
-      OutlinedCard(
-          modifier =
-              Modifier.fillMaxWidth()
-                  .clip(MaterialTheme.shapes.medium)
-                  .combinedClickable(
-                      onClick = {
-                        // Play the first track from this album
-                        val sampleTrack = sampleTracks[albums.indexOf(album) % sampleTracks.size]
-                        playbackViewModel.playTrack(sampleTrack)
-                      },
-                      onLongClick = {
-                        selectedAlbum = album
-                        showBottomSheet = true
-                      },
-                  ),
-          elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-      ) {
-        Column {
-          AsyncImage(
-              model = album.imageUrl,
-              contentDescription = album.title,
-              modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium),
-              contentScale = ContentScale.Crop,
-          )
-          Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                text = album.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(horizontal = 4.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = album.artist,
-                fontSize = 12.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 4.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-          }
         }
-      }
     }
-  }
+
+    // Main Grid Content
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(albums) { album ->
+            OutlinedCard(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .clip(MaterialTheme.shapes.medium)
+                        .combinedClickable(
+                            onClick = {
+                                // Play the first track from this album
+                                val sampleTrack =
+                                    sampleTracks[albums.indexOf(album) % sampleTracks.size]
+                                playbackViewModel.playTrack(sampleTrack)
+                            },
+                            onLongClick = {
+                                selectedAlbum = album
+                                showBottomSheet = true
+                            },
+                        ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            ) {
+                Column {
+                    AsyncImage(
+                        model = album.imageUrl,
+                        contentDescription = album.title,
+                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Text(
+                            text = album.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = album.artist,
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun ArtistsTab(scrollBehavior: TopAppBarScrollBehavior) {
-  LazyColumn(
-      modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
-  ) {
-    items(20) { index -> Text("Artist $index", modifier = Modifier.padding(16.dp)) }
-  }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) {
+        items(20) { index -> Text("Artist $index", modifier = Modifier.padding(16.dp)) }
+    }
 }
 
 @Composable
 fun PersonalScreen() {
-  Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    Text("Personal Page", style = MaterialTheme.typography.headlineMedium)
-    Text("Personal information here")
-  }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Personal Page", style = MaterialTheme.typography.headlineMedium)
+        Text("Personal information here")
+    }
 }
 
 @Composable
 fun SettingsScreen() {
-  Column(
-      modifier = Modifier.fillMaxSize().padding(16.dp),
-      horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    Text("Settings Page", style = MaterialTheme.typography.headlineMedium)
-    Text("Settings options here")
-  }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Settings Page", style = MaterialTheme.typography.headlineMedium)
+        Text("Settings options here")
+    }
 }
