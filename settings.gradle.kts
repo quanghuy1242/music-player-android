@@ -1,4 +1,5 @@
 rootProject.name = "mpcareal"
+
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
