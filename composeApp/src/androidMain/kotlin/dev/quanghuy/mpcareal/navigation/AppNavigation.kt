@@ -9,7 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -18,7 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.quanghuy.mpcareal.components.MediaPlaybackControlBar
 import dev.quanghuy.mpcareal.data.sampleTracks
-import dev.quanghuy.mpcareal.screens.*
+import dev.quanghuy.mpcareal.screens.HomeScreen
+import dev.quanghuy.mpcareal.screens.LibraryScreen
+import dev.quanghuy.mpcareal.screens.PersonalScreen
+import dev.quanghuy.mpcareal.screens.SearchScreen
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 
 @OptIn(
@@ -32,8 +35,8 @@ fun AppNavigation() {
         listOf(
             "Home" to Icons.Filled.Home,
             "Library" to Icons.AutoMirrored.Filled.LibraryBooks,
+            "Search" to Icons.Filled.Search,
             "Personal" to Icons.Filled.Person,
-            "Settings" to Icons.Filled.Settings,
         )
     var selectedIndex by remember { mutableIntStateOf(0) }
     var previousIndex by remember { mutableIntStateOf(0) }
@@ -136,8 +139,8 @@ fun AppNavigation() {
                 when (index) {
                     0 -> HomeScreen(playbackViewModel)
                     1 -> LibraryScreen(playbackViewModel)
-                    2 -> PersonalScreen()
-                    3 -> SettingsScreen()
+                    2 -> SearchScreen()
+                    3 -> PersonalScreen()
                 }
             }
         }
