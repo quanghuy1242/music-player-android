@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import dev.quanghuy.mpcareal.data.expandedSampleAlbums
 import dev.quanghuy.mpcareal.data.expandedSampleTracks
 import dev.quanghuy.mpcareal.data.sampleAlbums
 import dev.quanghuy.mpcareal.data.sampleTracks
@@ -218,7 +219,7 @@ fun SongsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: Playbac
 )
 @Composable
 fun AlbumsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: PlaybackViewModel) {
-    val albums = remember { List(50) { sampleAlbums[it % sampleAlbums.size] } }
+    val albums = remember { expandedSampleAlbums }
     val scope = rememberCoroutineScope()
     var selectedAlbum by remember { mutableStateOf<Album?>(null) }
     var showBottomSheet by remember { mutableStateOf(false) }

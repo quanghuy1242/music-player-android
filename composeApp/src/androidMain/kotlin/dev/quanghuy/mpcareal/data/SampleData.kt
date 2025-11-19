@@ -42,12 +42,25 @@ val sampleTracks =
         ),
     )
 
-val expandedSampleTracks = generateSampleTracks(500)
+val expandedSampleTracks by lazy { generateSampleTracks(500) }
 
 fun generateSampleTracks(count: Int): List<Track> {
     val baseTracks = sampleTracks
     return (1..count).map { i ->
         val base = baseTracks[(i - 1) % baseTracks.size]
+        base.copy(
+            title = "${base.title} ($i)",
+            artist = "${base.artist} ($i)"
+        )
+    }
+}
+
+val expandedSampleAlbums by lazy { generateSampleAlbums(500) }
+
+fun generateSampleAlbums(count: Int): List<Album> {
+    val baseAlbums = sampleAlbums
+    return (1..count).map { i ->
+        val base = baseAlbums[(i - 1) % baseAlbums.size]
         base.copy(
             title = "${base.title} ($i)",
             artist = "${base.artist} ($i)"
