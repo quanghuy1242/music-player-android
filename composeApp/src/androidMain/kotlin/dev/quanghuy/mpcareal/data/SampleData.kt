@@ -42,6 +42,19 @@ val sampleTracks =
         ),
     )
 
+val expandedSampleTracks = generateSampleTracks(500)
+
+fun generateSampleTracks(count: Int): List<Track> {
+    val baseTracks = sampleTracks
+    return (1..count).map { i ->
+        val base = baseTracks[(i - 1) % baseTracks.size]
+        base.copy(
+            title = "${base.title} ($i)",
+            artist = "${base.artist} ($i)"
+        )
+    }
+}
+
 val sampleAlbums =
     listOf(
         Album(

@@ -16,6 +16,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,9 +30,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import dev.quanghuy.mpcareal.data.expandedSampleTracks
 import dev.quanghuy.mpcareal.data.sampleAlbums
 import dev.quanghuy.mpcareal.data.sampleTracks
 import dev.quanghuy.mpcareal.models.Album
+import dev.quanghuy.mpcareal.models.Track
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlinx.coroutines.launch
 
@@ -107,10 +110,105 @@ fun LibraryScreen(playbackViewModel: PlaybackViewModel) {
 )
 @Composable
 fun SongsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: PlaybackViewModel) {
+    val scope = rememberCoroutineScope()
+    var selectedTrack by remember { mutableStateOf<Track?>(null) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+    // Modal Bottom Sheet
+    if (showBottomSheet && selectedTrack != null) {
+        ModalBottomSheet(onDismissRequest = { showBottomSheet = false }, sheetState = sheetState) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                ) {
+                    AsyncImage(
+                        model = selectedTrack!!.imageUrl,
+                        contentDescription = selectedTrack!!.title,
+                        modifier = Modifier.size(64.dp).clip(MaterialTheme.shapes.small),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = selectedTrack!!.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = selectedTrack!!.artist,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                // Song Options with Icons
+                listOf(
+                        "Play Song" to Icons.Default.PlayArrow,
+                        "Add to Favorites" to Icons.Default.Favorite,
+                        "Share" to Icons.Default.Share,
+                        "Download" to Icons.Default.Download,
+                    )
+                    .forEach { (option, icon) ->
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .clickable {
+                                        scope.launch {
+                                            sheetState.hide()
+                                            showBottomSheet = false
+                                        }
+                                        // Handle option selection
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = option,
+                                modifier = Modifier.size(24.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(text = option, fontSize = 16.sp)
+                        }
+                    }
+            }
+        }
+    }
+
+    // Main List Content
     LazyColumn(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
-        items(20) { index -> Text("Song $index", modifier = Modifier.padding(16.dp)) }
+        items(expandedSampleTracks) { track ->
+            ListItem(
+                headlineContent = { Text(track.title) },
+                supportingContent = { Text(track.artist) },
+                leadingContent = {
+                    AsyncImage(
+                        model = track.imageUrl,
+                        contentDescription = track.title,
+                        modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                        contentScale = ContentScale.Crop,
+                    )
+                },
+                modifier = Modifier.combinedClickable(
+                    onClick = { playbackViewModel.playTrack(track) },
+                    onLongClick = {
+                        selectedTrack = track
+                        showBottomSheet = true
+                    }
+                )
+            )
+        }
     }
 }
 
