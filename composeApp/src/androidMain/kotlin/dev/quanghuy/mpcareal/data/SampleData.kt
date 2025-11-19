@@ -1,6 +1,7 @@
 package dev.quanghuy.mpcareal.data
 
 import dev.quanghuy.mpcareal.models.Album
+import dev.quanghuy.mpcareal.models.Artist
 import dev.quanghuy.mpcareal.models.Track
 
 val sampleTracks =
@@ -68,6 +69,16 @@ fun generateSampleAlbums(count: Int): List<Album> {
     }
 }
 
+val expandedSampleArtists by lazy { generateSampleArtists(500) }
+
+fun generateSampleArtists(count: Int): List<Artist> {
+    val baseArtists = sampleArtists
+    return (1..count).map { i ->
+        val base = baseArtists[(i - 1) % baseArtists.size]
+        base.copy(name = "${base.name} ($i)")
+    }
+}
+
 val sampleAlbums =
     listOf(
         Album(
@@ -104,5 +115,29 @@ val sampleAlbums =
             imageUrl =
                 "https://contents.quanghuy.dev/79EEE411-BF3C-4F63-BD5E-39C673FFA737_sk1.jpeg",
             genre = "Soundtrack",
+        ),
+    )
+
+val sampleArtists =
+    listOf(
+        Artist(
+            name = "Bùi Lan Hương",
+            imageUrl =
+                "https://contents.quanghuy.dev/118CD291-17C4-4E0E-B51C-D8504A57E4D5_sk1.jpeg",
+        ),
+        Artist(
+            name = "Epic Mountain",
+            imageUrl =
+                "https://contents.quanghuy.dev/35F87834-A50F-40FB-9F76-E994D99D2656_sk1.jpeg",
+        ),
+        Artist(
+            name = "Lana Del Rey",
+            imageUrl =
+                "https://contents.quanghuy.dev/73494CD3-B6D7-4931-8978-CD3E3C6EC7EF_sk1.jpeg",
+        ),
+        Artist(
+            name = "Chris Remo",
+            imageUrl =
+                "https://contents.quanghuy.dev/79EEE411-BF3C-4F63-BD5E-39C673FFA737_sk1.jpeg",
         ),
     )

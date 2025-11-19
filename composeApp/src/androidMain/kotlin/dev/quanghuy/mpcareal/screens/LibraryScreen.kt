@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -31,10 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.data.expandedSampleAlbums
+import dev.quanghuy.mpcareal.data.expandedSampleArtists
 import dev.quanghuy.mpcareal.data.expandedSampleTracks
 import dev.quanghuy.mpcareal.data.sampleAlbums
 import dev.quanghuy.mpcareal.data.sampleTracks
 import dev.quanghuy.mpcareal.models.Album
+import dev.quanghuy.mpcareal.models.Artist
 import dev.quanghuy.mpcareal.models.Track
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlinx.coroutines.launch
@@ -362,6 +365,21 @@ fun ArtistsTab(scrollBehavior: TopAppBarScrollBehavior) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
-        items(20) { index -> Text("Artist $index", modifier = Modifier.padding(16.dp)) }
+        items(expandedSampleArtists) { artist ->
+            ListItem(
+                headlineContent = { Text(artist.name) },
+                leadingContent = {
+                    AsyncImage(
+                        model = artist.imageUrl,
+                        contentDescription = artist.name,
+                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                },
+                modifier = Modifier.clickable {
+                    // TODO: Navigate to artist detail or play artist songs
+                }
+            )
+        }
     }
 }

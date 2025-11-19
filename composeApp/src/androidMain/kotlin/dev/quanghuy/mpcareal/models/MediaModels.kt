@@ -8,3 +8,5 @@ data class Track(
     val imageUrl: String,
     val duration: Long = 180000L,
 )
+
+data class Artist(val name: String, val imageUrl: String)
