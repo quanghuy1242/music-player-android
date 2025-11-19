@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun LibraryScreen(playbackViewModel: PlaybackViewModel) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val pagerState = rememberPagerState { 3 }
     val scope = rememberCoroutineScope()
     val tabs = listOf("Songs", "Albums", "Artists")
