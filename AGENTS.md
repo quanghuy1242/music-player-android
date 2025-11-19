@@ -1,3 +1,6 @@
+# IMPORTANT NOTES
+- Use docser search_android tool to search online documentation about Android/Kotlin.
+
 # BUILD COMMANDS
 - Build: `gradlew.bat assembleDebug` (VS Code task: "Assemble Debug APK")
 - Format: `java -jar jars\ktfmt-0.59-with-dependencies.jar --kotlinlang-style -r src composeApp\src` (VS Code task: "Format Code")
