@@ -192,7 +192,7 @@ fun SongsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: Playbac
     LazyColumn(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
-        items(expandedSampleTracks) { track ->
+        items(expandedSampleTracks, key = { it.title }) { track ->
             ListItem(
                 headlineContent = { Text(track.title) },
                 supportingContent = { Text(track.artist) },
@@ -305,7 +305,7 @@ fun AlbumsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: Playba
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(albums) { album ->
+        items(albums, key = { it.title }) { album ->
             OutlinedCard(
                 modifier =
                     Modifier.fillMaxWidth()
@@ -365,7 +365,7 @@ fun ArtistsTab(scrollBehavior: TopAppBarScrollBehavior) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
     ) {
-        items(expandedSampleArtists) { artist ->
+        items(expandedSampleArtists, key = { it.name }) { artist ->
             ListItem(
                 headlineContent = { Text(artist.name) },
                 leadingContent = {
