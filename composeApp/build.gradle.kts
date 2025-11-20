@@ -19,10 +19,10 @@ kotlin {
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation("io.coil-kt.coil3:coil:3.3.0")
             implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
-            implementation("androidx.compose.material3:material3:1.5.0-alpha08")
+            implementation("androidx.compose.material3:material3:1.5.0-alpha09")
             implementation("androidx.compose.material3:material3-window-size-class:1.4.0")
             implementation(
-                "androidx.compose.material3:material3-adaptive-navigation-suite:1.5.0-alpha08"
+                "androidx.compose.material3:material3-adaptive-navigation-suite:1.5.0-alpha09"
             )
         }
         commonMain.dependencies {

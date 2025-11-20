@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,11 +13,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.*
+import androidx.compose.material3.ListItem
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,10 +34,8 @@ import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.data.expandedSampleAlbums
 import dev.quanghuy.mpcareal.data.expandedSampleArtists
 import dev.quanghuy.mpcareal.data.expandedSampleTracks
-import dev.quanghuy.mpcareal.data.sampleAlbums
 import dev.quanghuy.mpcareal.data.sampleTracks
 import dev.quanghuy.mpcareal.models.Album
-import dev.quanghuy.mpcareal.models.Artist
 import dev.quanghuy.mpcareal.models.Track
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlinx.coroutines.launch
@@ -204,13 +202,14 @@ fun SongsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: Playbac
                         contentScale = ContentScale.Crop,
                     )
                 },
-                modifier = Modifier.combinedClickable(
-                    onClick = { playbackViewModel.playTrack(track) },
-                    onLongClick = {
-                        selectedTrack = track
-                        showBottomSheet = true
-                    }
-                )
+                modifier =
+                    Modifier.combinedClickable(
+                        onClick = { playbackViewModel.playTrack(track) },
+                        onLongClick = {
+                            selectedTrack = track
+                            showBottomSheet = true
+                        },
+                    ),
             )
         }
     }
@@ -376,9 +375,10 @@ fun ArtistsTab(scrollBehavior: TopAppBarScrollBehavior) {
                         contentScale = ContentScale.Crop,
                     )
                 },
-                modifier = Modifier.clickable {
-                    // TODO: Navigate to artist detail or play artist songs
-                }
+                modifier =
+                    Modifier.clickable {
+                        // TODO: Navigate to artist detail or play artist songs
+                    },
             )
         }
     }

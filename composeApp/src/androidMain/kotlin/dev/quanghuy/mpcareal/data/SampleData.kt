@@ -49,10 +49,7 @@ fun generateSampleTracks(count: Int): List<Track> {
     val baseTracks = sampleTracks
     return (1..count).map { i ->
         val base = baseTracks[(i - 1) % baseTracks.size]
-        base.copy(
-            title = "${base.title} ($i)",
-            artist = "${base.artist} ($i)"
-        )
+        base.copy(title = "${base.title} ($i)", artist = "${base.artist} ($i)")
     }
 }
 
@@ -62,10 +59,7 @@ fun generateSampleAlbums(count: Int): List<Album> {
     val baseAlbums = sampleAlbums
     return (1..count).map { i ->
         val base = baseAlbums[(i - 1) % baseAlbums.size]
-        base.copy(
-            title = "${base.title} ($i)",
-            artist = "${base.artist} ($i)"
-        )
+        base.copy(title = "${base.title} ($i)", artist = "${base.artist} ($i)")
     }
 }
 
@@ -122,22 +116,18 @@ val sampleArtists =
     listOf(
         Artist(
             name = "Bùi Lan Hương",
-            imageUrl =
-                "https://contents.quanghuy.dev/118CD291-17C4-4E0E-B51C-D8504A57E4D5_sk1.jpeg",
+            imageUrl = "https://contents.quanghuy.dev/118CD291-17C4-4E0E-B51C-D8504A57E4D5_sk1.jpeg",
         ),
         Artist(
             name = "Epic Mountain",
-            imageUrl =
-                "https://contents.quanghuy.dev/35F87834-A50F-40FB-9F76-E994D99D2656_sk1.jpeg",
+            imageUrl = "https://contents.quanghuy.dev/35F87834-A50F-40FB-9F76-E994D99D2656_sk1.jpeg",
         ),
         Artist(
             name = "Lana Del Rey",
-            imageUrl =
-                "https://contents.quanghuy.dev/73494CD3-B6D7-4931-8978-CD3E3C6EC7EF_sk1.jpeg",
+            imageUrl = "https://contents.quanghuy.dev/73494CD3-B6D7-4931-8978-CD3E3C6EC7EF_sk1.jpeg",
         ),
         Artist(
             name = "Chris Remo",
-            imageUrl =
-                "https://contents.quanghuy.dev/79EEE411-BF3C-4F63-BD5E-39C673FFA737_sk1.jpeg",
+            imageUrl = "https://contents.quanghuy.dev/79EEE411-BF3C-4F63-BD5E-39C673FFA737_sk1.jpeg",
         ),
     )

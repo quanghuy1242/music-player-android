@@ -1,5 +1,7 @@
 # IMPORTANT NOTES
-- Use docser search_android tool to search online documentation about Android/Kotlin.
+- Use docser search_android tool to search online documentation about Android/Kotlin for the target urls/hrefs, and use docser crawl_url tool to crawl specific urls for information.
+- Always follow the project rules and code style guidelines below.
+- Use a simple term or single term or a keyword to search for information when needed at a time, don't overwhelm with too many terms all at once, for example, search for "FloatingActionButtonMenu" or "ToggleFloatingActionButton" or "FloatingActionButtonMenuItem" separetely instead of making a single query of "FloatingActionButtonMenu ToggleFloatingActionButton FloatingActionButtonMenuItem docs"
 
 # BUILD COMMANDS
 - Build: `gradlew.bat assembleDebug` (VS Code task: "Assemble Debug APK")
