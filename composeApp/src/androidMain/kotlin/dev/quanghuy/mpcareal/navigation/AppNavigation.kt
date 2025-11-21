@@ -88,15 +88,7 @@ fun AppNavigation() {
             }
         },
         bottomBar = {
-            Column(
-                modifier = Modifier.pointerInput(Unit) {
-                    detectVerticalDragGestures { _, dragAmount ->
-                        if (dragAmount < -20) { // Swipe up (negative Y), lower threshold
-                            playbackViewModel.togglePlayerExpanded()
-                        }
-                    }
-                }
-            ) {
+            Column {
                 MediaPlaybackControlBar(
                     currentTrack = playbackViewModel.currentTrack,
                     isPlaying = playbackViewModel.isPlaying,

@@ -327,7 +327,7 @@ fun AlbumsTab(scrollBehavior: TopAppBarScrollBehavior, playbackViewModel: Playba
                     AsyncImage(
                         model = album.imageUrl,
                         contentDescription = album.title,
-                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium),
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(MaterialTheme.shapes.medium),
                         contentScale = ContentScale.Crop,
                     )
                     Column(modifier = Modifier.padding(8.dp)) {

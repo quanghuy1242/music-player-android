@@ -2,13 +2,14 @@ package dev.quanghuy.mpcareal.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,10 +39,32 @@ fun MediaPlaybackControlBar(
         }
 
     if (currentTrack != null) {
+        var totalDragY by remember { mutableFloatStateOf(0f) }
+        var isSwiping by remember { mutableStateOf(false) }
+
         Card(
             modifier = modifier.fillMaxWidth()
                 .pointerInput(Unit) {
-                    detectTapGestures { onExpand() }
+                    detectTapGestures(onTap = { onExpand() })
+                }
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onDragStart = {
+                            totalDragY = 0f
+                            isSwiping = false
+                        },
+                        onDragEnd = {
+                            totalDragY = 0f
+                            isSwiping = false
+                        }
+                    ) { change, dragAmount ->
+                        change.consume()
+                        totalDragY += dragAmount
+                        if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
+                            onExpand()
+                            isSwiping = true
+                        }
+                    }
                 },
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
