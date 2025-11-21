@@ -3,6 +3,7 @@ package dev.quanghuy.mpcareal.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -15,11 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import dev.quanghuy.mpcareal.components.MediaPlaybackControlBar
 import dev.quanghuy.mpcareal.data.sampleTracks
 import dev.quanghuy.mpcareal.screens.HomeScreen
 import dev.quanghuy.mpcareal.screens.LibraryScreen
+import dev.quanghuy.mpcareal.screens.NowPlayingScreen
 import dev.quanghuy.mpcareal.screens.PersonalScreen
 import dev.quanghuy.mpcareal.screens.SearchScreen
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
@@ -31,6 +35,8 @@ import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 @Composable
 fun AppNavigation() {
     val playbackViewModel: PlaybackViewModel = viewModel<PlaybackViewModel>()
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val navItems =
         listOf(
             "Home" to Icons.Filled.Home,
@@ -82,13 +88,22 @@ fun AppNavigation() {
             }
         },
         bottomBar = {
-            Column {
+            Column(
+                modifier = Modifier.pointerInput(Unit) {
+                    detectVerticalDragGestures { _, dragAmount ->
+                        if (dragAmount < -20) { // Swipe up (negative Y), lower threshold
+                            playbackViewModel.togglePlayerExpanded()
+                        }
+                    }
+                }
+            ) {
                 MediaPlaybackControlBar(
                     currentTrack = playbackViewModel.currentTrack,
                     isPlaying = playbackViewModel.isPlaying,
                     onPlayPause = { playbackViewModel.togglePlayPause() },
                     onNext = { playbackViewModel.nextTrack() },
                     onPrevious = { playbackViewModel.previousTrack() },
+                    onExpand = { playbackViewModel.togglePlayerExpanded() },
                 )
 
                 // Navigation bar
@@ -143,6 +158,19 @@ fun AppNavigation() {
                     3 -> PersonalScreen()
                 }
             }
+        }
+    }
+
+    // Modal Bottom Sheet for expanded player
+    if (playbackViewModel.isPlayerExpanded) {
+        LaunchedEffect(Unit) {
+            scope.launch { sheetState.expand() }
+        }
+        ModalBottomSheet(
+            onDismissRequest = { playbackViewModel.togglePlayerExpanded() },
+            sheetState = sheetState,
+        ) {
+            NowPlayingScreen(playbackViewModel)
         }
     }
 }

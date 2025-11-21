@@ -1,6 +1,7 @@
 package dev.quanghuy.mpcareal.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +27,7 @@ fun MediaPlaybackControlBar(
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onExpand: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val progress =
@@ -36,7 +39,10 @@ fun MediaPlaybackControlBar(
 
     if (currentTrack != null) {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectTapGestures { onExpand() }
+                },
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
                 MaterialTheme.shapes.extraSmall.copy(

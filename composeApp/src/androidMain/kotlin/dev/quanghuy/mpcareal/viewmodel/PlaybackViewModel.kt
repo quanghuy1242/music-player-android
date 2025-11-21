@@ -16,6 +16,9 @@ class PlaybackViewModel : ViewModel() {
     var currentPosition by mutableStateOf(0L)
         private set
 
+    var isPlayerExpanded by mutableStateOf(false)
+        private set
+
     fun playTrack(track: Track) {
         currentTrack = track
         isPlaying = true
@@ -36,5 +39,9 @@ class PlaybackViewModel : ViewModel() {
         // In a real app, this would cycle through a playlist
         isPlaying = false
         currentPosition = 0L
+    }
+
+    fun togglePlayerExpanded() {
+        isPlayerExpanded = !isPlayerExpanded
     }
 }
