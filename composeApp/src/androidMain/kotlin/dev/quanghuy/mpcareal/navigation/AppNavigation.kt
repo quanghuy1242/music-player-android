@@ -6,8 +6,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -37,8 +37,8 @@ fun AppNavigation() {
     // using full-screen overlay instead of ModalBottomSheet for Now Playing.
     val navItems =
         listOf(
-            "Home" to Icons.Filled.Home,
             "Library" to Icons.AutoMirrored.Filled.LibraryBooks,
+            "Playlist" to Icons.AutoMirrored.Filled.QueueMusic,
             "Search" to Icons.Filled.Search,
             "Personal" to Icons.Filled.Person,
         )
@@ -145,8 +145,8 @@ fun AppNavigation() {
                 label = "ScreenTransition",
             ) { index ->
                 when (index) {
-                    0 -> HomeScreen(playbackViewModel)
-                    1 -> LibraryScreen(playbackViewModel)
+                    0 -> LibraryScreen(playbackViewModel)
+                    1 -> HomeScreen(playbackViewModel)
                     2 -> SearchScreen()
                     3 -> PersonalScreen()
                 }

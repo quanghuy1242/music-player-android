@@ -4,6 +4,10 @@
 - Use a simple term or single term or a keyword to search for information when needed at a time, don't overwhelm with too many terms all at once, for example, search for "FloatingActionButtonMenu" or "ToggleFloatingActionButton" or "FloatingActionButtonMenuItem" separetely instead of making a single query of "FloatingActionButtonMenu ToggleFloatingActionButton FloatingActionButtonMenuItem docs"
 
 # BUILD COMMANDS
+- Do NOT use VS Code 'Run Task' actions for build/format/test. Always run the exact
+	commands below directly in a shell (PowerShell, cmd.exe, or equivalent).
+	Example commands: `./gradlew.bat assembleDebug`, `java -jar jars/ktfmt-...`,
+	`./gradlew.bat test`.
 - Build: `.\gradlew.bat assembleDebug`
 - Format: `java -jar jars\ktfmt-0.59-with-dependencies.jar --kotlinlang-style -r src composeApp\src`
 - Test: `.\gradlew.bat test` (single test: `.\gradlew.bat test --tests "ClassName.testName"`)

@@ -1,7 +1,7 @@
 package dev.quanghuy.mpcareal.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -47,28 +47,25 @@ fun MediaPlaybackControlBar(
 
         Card(
             modifier =
-                modifier
-                    .fillMaxWidth()
-                    .pointerInput(Unit) { detectTapGestures(onTap = { onExpand() }) }
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures(
-                            onDragStart = {
-                                totalDragY = 0f
-                                isSwiping = false
-                            },
-                            onDragEnd = {
-                                totalDragY = 0f
-                                isSwiping = false
-                            },
-                        ) { change, dragAmount ->
-                            change.consume()
-                            totalDragY += dragAmount
-                            if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
-                                onExpand()
-                                isSwiping = true
-                            }
+                modifier.fillMaxWidth().clickable(onClick = onExpand).pointerInput(Unit) {
+                    detectVerticalDragGestures(
+                        onDragStart = {
+                            totalDragY = 0f
+                            isSwiping = false
+                        },
+                        onDragEnd = {
+                            totalDragY = 0f
+                            isSwiping = false
+                        },
+                    ) { change, dragAmount ->
+                        change.consume()
+                        totalDragY += dragAmount
+                        if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
+                            onExpand()
+                            isSwiping = true
                         }
-                    },
+                    }
+                },
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
                 MaterialTheme.shapes.extraSmall.copy(

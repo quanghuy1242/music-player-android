@@ -37,7 +37,7 @@
             "label": "Launch App",
             "type": "shell",
             "command": "cmd.exe",
-            "args": ["/c", "adb", "shell", "am", "start", "-n", "dev.quanghuy.mpcareal/.MainActivity"],
+            "args": ["/c", "adb", "shell", "am", "start", "-n", "dev.quanghuy.mpcareal.debug/dev.quanghuy.mpcareal.MainActivity"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
