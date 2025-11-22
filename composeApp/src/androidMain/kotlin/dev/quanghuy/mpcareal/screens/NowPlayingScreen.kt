@@ -88,7 +88,7 @@ fun NowPlayingScreen(
 
         CompositionLocalProvider(LocalContentColor provides Color.White) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Spacer(modifier = Modifier.height(16.dp))

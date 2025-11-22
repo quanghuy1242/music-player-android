@@ -1,5 +1,6 @@
 package dev.quanghuy.mpcareal.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -64,6 +65,8 @@ fun FullscreenNowPlayingOverlay(
     // Use an overlay Box inside the root composition so coordinates align for shared-element
     // transitions
     Box(modifier = Modifier.fillMaxSize().zIndex(1f), contentAlignment = Alignment.BottomCenter) {
+        // Intercept system back gesture to close overlay with exit animation
+        BackHandler(enabled = true) { isLeaving = true }
         // Scrim
         Box(
             modifier =
