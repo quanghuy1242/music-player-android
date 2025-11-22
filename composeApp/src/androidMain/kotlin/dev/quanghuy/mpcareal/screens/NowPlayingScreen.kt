@@ -100,7 +100,7 @@ fun NowPlayingScreen(
                     horizontalArrangement =
                         Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
                 ) {
-                    val options = listOf("Now Playing", "Lyrics", "Queue")
+                    val options = listOf("Playing", "Lyrics", "Queue")
                     val modifiers =
                         listOf(
                             Modifier.semantics { role = Role.RadioButton },
