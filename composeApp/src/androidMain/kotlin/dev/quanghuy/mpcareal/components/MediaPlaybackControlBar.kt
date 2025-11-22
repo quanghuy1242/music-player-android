@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ fun MediaPlaybackControlBar(
     onPrevious: () -> Unit,
     onExpand: () -> Unit,
     modifier: Modifier = Modifier,
+    onMiniArtBoundsChanged: ((Float, Float, Float, Float) -> Unit)? = null,
 ) {
     val progress =
         if (currentTrack != null) {
@@ -98,7 +101,18 @@ fun MediaPlaybackControlBar(
                     AsyncImage(
                         model = currentTrack.imageUrl,
                         contentDescription = currentTrack.title,
-                        modifier = Modifier.size(48.dp).clip(MaterialTheme.shapes.small),
+                        modifier =
+                            Modifier.size(48.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .onGloballyPositioned { coords ->
+                                    val pos = coords.positionInWindow()
+                                    onMiniArtBoundsChanged?.invoke(
+                                        pos.x,
+                                        pos.y,
+                                        coords.size.width.toFloat(),
+                                        coords.size.height.toFloat(),
+                                    )
+                                },
                         contentScale = ContentScale.Crop,
                     )
 

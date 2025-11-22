@@ -21,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.*
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +29,10 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -149,12 +153,52 @@ fun NowPlayingScreen(
                                     modifier = Modifier.wrapContentHeight(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
+                                    var fullArtX by remember { mutableFloatStateOf(0f) }
+                                    var fullArtY by remember { mutableFloatStateOf(0f) }
+                                    var fullArtW by remember { mutableFloatStateOf(0f) }
+                                    var fullArtH by remember { mutableFloatStateOf(0f) }
+                                    val mini = playbackViewModel.miniArtBounds
+                                    var translationX: Float
+                                    var translationY: Float
+                                    var scale: Float
+
+                                    if (mini == null || fullArtW == 0f || fullArtH == 0f) {
+                                        translationX = 0f
+                                        translationY = 0f
+                                        scale = 1f
+                                    } else {
+                                        val fullCenterX = fullArtX + fullArtW / 2f
+                                        val fullCenterY = fullArtY + fullArtH / 2f
+                                        val miniCenterX = mini.x + mini.width / 2f
+                                        val miniCenterY = mini.y + mini.height / 2f
+                                        translationX =
+                                            (miniCenterX - fullCenterX) * (1f - sheetProgress)
+                                        translationY =
+                                            (miniCenterY - fullCenterY) * (1f - sheetProgress)
+                                        val startScale =
+                                            if (fullArtW > 0f) (mini.width / fullArtW) else 1f
+                                        scale = startScale + (1f - startScale) * sheetProgress
+                                    }
+
                                     AsyncImage(
                                         model = currentTrack.imageUrl,
                                         contentDescription = currentTrack.title,
                                         modifier =
                                             Modifier.size(artSize)
-                                                .clip(MaterialTheme.shapes.medium),
+                                                .clip(MaterialTheme.shapes.medium)
+                                                .onGloballyPositioned { coords ->
+                                                    val pos = coords.positionInWindow()
+                                                    fullArtX = pos.x
+                                                    fullArtY = pos.y
+                                                    fullArtW = coords.size.width.toFloat()
+                                                    fullArtH = coords.size.height.toFloat()
+                                                }
+                                                .graphicsLayer {
+                                                    translationX = translationX
+                                                    translationY = translationY
+                                                    scaleX = scale
+                                                    scaleY = scale
+                                                },
                                         contentScale = ContentScale.Crop,
                                     )
 

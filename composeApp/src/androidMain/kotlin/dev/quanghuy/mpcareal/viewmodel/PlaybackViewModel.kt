@@ -19,6 +19,19 @@ class PlaybackViewModel : ViewModel() {
     var isPlayerExpanded by mutableStateOf(false)
         private set
 
+    data class MiniArtBounds(val x: Float, val y: Float, val width: Float, val height: Float)
+
+    var miniArtBounds by mutableStateOf<MiniArtBounds?>(null)
+        private set
+
+    fun updateMiniArtBounds(x: Float, y: Float, width: Float, height: Float) {
+        miniArtBounds = MiniArtBounds(x, y, width, height)
+    }
+
+    fun clearMiniArtBounds() {
+        miniArtBounds = null
+    }
+
     fun playTrack(track: Track) {
         currentTrack = track
         isPlaying = true

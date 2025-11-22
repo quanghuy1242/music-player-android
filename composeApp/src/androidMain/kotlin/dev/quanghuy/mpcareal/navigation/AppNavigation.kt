@@ -94,6 +94,9 @@ fun AppNavigation() {
                     onNext = { playbackViewModel.nextTrack() },
                     onPrevious = { playbackViewModel.previousTrack() },
                     onExpand = { playbackViewModel.togglePlayerExpanded() },
+                    onMiniArtBoundsChanged = { x, y, w, h ->
+                        playbackViewModel.updateMiniArtBounds(x, y, w, h)
+                    },
                 )
 
                 // Navigation bar

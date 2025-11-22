@@ -24,8 +24,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -62,62 +61,56 @@ fun FullscreenNowPlayingOverlay(
         }
     }
 
-    Dialog(
-        onDismissRequest = {
-            // start exit animation
-            isLeaving = true
-        },
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-            // Scrim
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = scrimAlpha))
-                        .pointerInput(Unit) { detectDragGestures { _, _ -> /* no-op */ } }
-                        .clickable { isLeaving = true }
-            )
+    // Use an overlay Box inside the root composition so coordinates align for shared-element
+    // transitions
+    Box(modifier = Modifier.fillMaxSize().zIndex(1f), contentAlignment = Alignment.BottomCenter) {
+        // Scrim
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = scrimAlpha))
+                    .pointerInput(Unit) { detectDragGestures { _, _ -> /* no-op */ } }
+                    .clickable { isLeaving = true }
+        )
 
-            // sliding full-screen content anchored at bottom
-            Box(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .offset { IntOffset(0, offsetYValue.roundToInt()) }
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDrag = { change, dragAmount ->
-                                    change.consume()
-                                    scope.launch {
-                                        val next =
-                                            (dragOffset.value + dragAmount.y).coerceIn(
-                                                0f,
-                                                screenHeightPx,
-                                            )
-                                        dragOffset.snapTo(next)
+        // sliding full-screen content anchored at bottom
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .offset { IntOffset(0, offsetYValue.roundToInt()) }
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    val next =
+                                        (dragOffset.value + dragAmount.y).coerceIn(
+                                            0f,
+                                            screenHeightPx,
+                                        )
+                                    dragOffset.snapTo(next)
+                                }
+                            },
+                            onDragEnd = {
+                                scope.launch {
+                                    val combined =
+                                        (1f - progress) * screenHeightPx + dragOffset.value
+                                    val shouldDismiss = combined > screenHeightPx * 0.25f
+                                    if (shouldDismiss) {
+                                        dragOffset.animateTo(
+                                            screenHeightPx,
+                                            animationSpec = tween(200),
+                                        )
+                                        isLeaving = true
+                                    } else {
+                                        dragOffset.animateTo(0f, animationSpec = tween(180))
                                     }
-                                },
-                                onDragEnd = {
-                                    scope.launch {
-                                        val combined =
-                                            (1f - progress) * screenHeightPx + dragOffset.value
-                                        val shouldDismiss = combined > screenHeightPx * 0.25f
-                                        if (shouldDismiss) {
-                                            dragOffset.animateTo(
-                                                screenHeightPx,
-                                                animationSpec = tween(200),
-                                            )
-                                            isLeaving = true
-                                        } else {
-                                            dragOffset.animateTo(0f, animationSpec = tween(180))
-                                        }
-                                    }
-                                },
-                            )
-                        }
-            ) {
-                content(progress)
-            }
+                                }
+                            },
+                        )
+                    }
+        ) {
+            content(progress)
         }
     }
 }
