@@ -117,7 +117,7 @@ fun NowPlayingScreen(playbackViewModel: PlaybackViewModel, modifier: Modifier = 
                                     ButtonDefaults.textStyleFor(
                                         ButtonDefaults.ExtraSmallContainerHeight
                                     ),
-                                color = Color.White,
+                                color = LocalContentColor.current,
                             )
                         }
                     }
@@ -179,22 +179,29 @@ fun NowPlayingScreen(playbackViewModel: PlaybackViewModel, modifier: Modifier = 
                                     OutlinedButton(
                                         onClick = { /* TODO: implement action */ },
                                         modifier =
-                                            Modifier.height(ButtonDefaults.MinHeight).semantics {
-                                                role = Role.Button
-                                            },
-                                        shape = MaterialTheme.shapes.small,
-                                        contentPadding = ButtonDefaults.SmallContentPadding,
+                                            Modifier.height(
+                                                    ButtonDefaults.ExtraSmallContainerHeight
+                                                )
+                                                .semantics { role = Role.Button },
+                                        shapes = ButtonDefaults.shapes(),
+                                        contentPadding =
+                                            PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                                         colors =
                                             ButtonDefaults.outlinedButtonColors(
-                                                contentColor = Color.White
+                                                contentColor = LocalContentColor.current
                                             ),
-                                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)),
+                                        border =
+                                            BorderStroke(
+                                                1.dp,
+                                                LocalContentColor.current.copy(alpha = 0.18f),
+                                            ),
                                     ) {
                                         Icon(
                                             imageVector = tool.second,
                                             contentDescription = tool.first,
                                             modifier =
                                                 Modifier.size(ButtonDefaults.ExtraSmallIconSize),
+                                            tint = LocalContentColor.current,
                                         )
                                         Spacer(
                                             modifier =
@@ -204,9 +211,9 @@ fun NowPlayingScreen(playbackViewModel: PlaybackViewModel, modifier: Modifier = 
                                             text = tool.first,
                                             style =
                                                 ButtonDefaults.textStyleFor(
-                                                    ButtonDefaults.MinHeight
+                                                    ButtonDefaults.ExtraSmallContainerHeight
                                                 ),
-                                            color = Color.White,
+                                            color = LocalContentColor.current,
                                         )
                                     }
                                 }

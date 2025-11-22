@@ -158,7 +158,8 @@ fun AppNavigation() {
             onDismissRequest = { playbackViewModel.togglePlayerExpanded() },
             sheetState = sheetState,
         ) {
-            NowPlayingScreen(playbackViewModel)
+            // Fill the sheet to the full screen content area
+            NowPlayingScreen(playbackViewModel, modifier = Modifier.fillMaxSize())
         }
     }
 }
