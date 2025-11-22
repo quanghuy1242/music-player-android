@@ -16,6 +16,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+// Using Modifier.blur for cross-platform consistent blur behavior
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -42,16 +45,17 @@ fun NowPlayingScreen(
     Box(modifier = modifier.fillMaxSize()) {
         // background: album image if available
         if (currentTrack != null) {
+            val bgModifier = Modifier.fillMaxSize().blur(60.dp)
+
             AsyncImage(
                 model = currentTrack.imageUrl,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().let {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) it.blur(24.dp) else it
-                },
+                modifier = bgModifier,
                 contentScale = ContentScale.Crop,
             )
             Box(
                 modifier = Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.36f))
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
@@ -124,23 +128,48 @@ fun NowPlayingScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // tools icon button row above slider (no ButtonGroup to avoid deprecation issues)
-                        Row(
+                        // tools labeled button toolbar above slider (horizontally scrollable)
+                        val tools = listOf(
+                            "Sleep" to Icons.Filled.Schedule,
+                            "Favorite" to Icons.Filled.Favorite,
+                            "Download" to Icons.Filled.Download,
+                            "Like" to Icons.Filled.FavoriteBorder,
+                            "Share" to Icons.Filled.Share,
+                            "Save" to Icons.Filled.Save,
+                            "Add" to Icons.Filled.Add,
+                            "More" to Icons.Filled.MoreHoriz,
+                        )
+
+                        LazyRow(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = 8.dp)
                                 .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp),
                         ) {
-                            // Core actions
-                            FilledIconButton(onClick = { /* sleep */ }) { Icon(Icons.Filled.Schedule, contentDescription = "Sleep") }
-                            FilledIconButton(onClick = { /* favorite */ }) { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
-                            FilledIconButton(onClick = { /* offline add */ }) { Icon(Icons.Filled.Download, contentDescription = "Offline") }
-                            // placeholders - 5 more
-                            FilledIconButton(onClick = { /* placeholder 1 */ }) { Icon(Icons.Filled.FavoriteBorder, contentDescription = "P1") }
-                            FilledIconButton(onClick = { /* placeholder 2 */ }) { Icon(Icons.Filled.Share, contentDescription = "P2") }
-                            FilledIconButton(onClick = { /* placeholder 3 */ }) { Icon(Icons.Filled.Save, contentDescription = "P3") }
-                            FilledIconButton(onClick = { /* placeholder 4 */ }) { Icon(Icons.Filled.Add, contentDescription = "P4") }
-                            FilledIconButton(onClick = { /* placeholder 5 */ }) { Icon(Icons.Filled.MoreHoriz, contentDescription = "P5") }
+                            items(tools) { tool ->
+                                OutlinedButton(
+                                    onClick = { /* TODO: implement action */ },
+                                    modifier = Modifier
+                                        .height(ButtonDefaults.MinHeight)
+                                        .semantics { role = Role.Button },
+                                    shape = MaterialTheme.shapes.small,
+                                    contentPadding = ButtonDefaults.SmallContentPadding,
+                                    colors = ButtonDefaults.outlinedButtonColors(),
+                                    border = ButtonDefaults.outlinedButtonBorder(),
+                                ) {
+                                    Icon(
+                                        imageVector = tool.second,
+                                        contentDescription = tool.first,
+                                        modifier = Modifier.size(ButtonDefaults.ExtraSmallIconSize),
+                                    )
+                                    Spacer(modifier = Modifier.width(ButtonDefaults.ExtraSmallIconSpacing))
+                                    Text(
+                                        text = tool.first,
+                                        style = ButtonDefaults.textStyleFor(ButtonDefaults.MinHeight),
+                                    )
+                                }
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
