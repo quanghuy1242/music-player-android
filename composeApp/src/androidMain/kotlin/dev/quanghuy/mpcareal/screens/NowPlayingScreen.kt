@@ -33,12 +33,17 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun NowPlayingScreen(playbackViewModel: PlaybackViewModel, modifier: Modifier = Modifier) {
+fun NowPlayingScreen(
+    playbackViewModel: PlaybackViewModel,
+    modifier: Modifier = Modifier,
+    sheetProgress: Float = 1f, // 0f collapsed, 1f expanded
+) {
     val currentTrack = playbackViewModel.currentTrack
     val isPlaying = playbackViewModel.isPlaying
     val progress =
@@ -130,10 +135,11 @@ fun NowPlayingScreen(playbackViewModel: PlaybackViewModel, modifier: Modifier = 
                     0 -> {
                         // Now playing content
                         if (currentTrack != null) {
+                            val artSize = lerp(72.dp, 300.dp, sheetProgress)
                             AsyncImage(
                                 model = currentTrack.imageUrl,
                                 contentDescription = currentTrack.title,
-                                modifier = Modifier.size(300.dp).clip(MaterialTheme.shapes.medium),
+                                modifier = Modifier.size(artSize).clip(MaterialTheme.shapes.medium),
                                 contentScale = ContentScale.Crop,
                             )
 

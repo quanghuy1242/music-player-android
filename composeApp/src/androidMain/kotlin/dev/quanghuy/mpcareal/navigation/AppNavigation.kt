@@ -18,13 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.quanghuy.mpcareal.components.MediaPlaybackControlBar
 import dev.quanghuy.mpcareal.data.sampleTracks
+import dev.quanghuy.mpcareal.screens.FullscreenNowPlayingOverlay
 import dev.quanghuy.mpcareal.screens.HomeScreen
 import dev.quanghuy.mpcareal.screens.LibraryScreen
 import dev.quanghuy.mpcareal.screens.NowPlayingScreen
 import dev.quanghuy.mpcareal.screens.PersonalScreen
 import dev.quanghuy.mpcareal.screens.SearchScreen
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(
     androidx.compose.material3.ExperimentalMaterial3Api::class,
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 fun AppNavigation() {
     val playbackViewModel: PlaybackViewModel = viewModel<PlaybackViewModel>()
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // using full-screen overlay instead of ModalBottomSheet for Now Playing.
     val navItems =
         listOf(
             "Home" to Icons.Filled.Home,
@@ -151,15 +151,15 @@ fun AppNavigation() {
         }
     }
 
-    // Modal Bottom Sheet for expanded player
-    if (playbackViewModel.isPlayerExpanded) {
-        LaunchedEffect(Unit) { scope.launch { sheetState.expand() } }
-        ModalBottomSheet(
-            onDismissRequest = { playbackViewModel.togglePlayerExpanded() },
-            sheetState = sheetState,
-        ) {
-            // Fill the sheet to the full screen content area
-            NowPlayingScreen(playbackViewModel, modifier = Modifier.fillMaxSize())
-        }
+    // Full-screen overlay for expanded player (custom animated dialog with drag-to-dismiss)
+    FullscreenNowPlayingOverlay(
+        show = playbackViewModel.isPlayerExpanded,
+        onDismiss = { playbackViewModel.togglePlayerExpanded() },
+    ) { progress ->
+        NowPlayingScreen(
+            playbackViewModel,
+            modifier = Modifier.fillMaxSize(),
+            sheetProgress = progress,
+        )
     }
 }
