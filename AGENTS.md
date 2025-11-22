@@ -33,6 +33,7 @@ composeApp/src/androidMain/kotlin/dev/quanghuy/mpcareal/
 - Error handling: prefer proper fixes over simplification
 
 # PROJECT RULES
+- Always format code after modifications
 - Never recreate entire files when editing - modify systematically
 - Ask user confirmation before adding dependencies
 - Don't change build configurations or existing dependencies

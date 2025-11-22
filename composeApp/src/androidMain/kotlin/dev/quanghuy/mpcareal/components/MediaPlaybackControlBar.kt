@@ -43,29 +43,29 @@ fun MediaPlaybackControlBar(
         var isSwiping by remember { mutableStateOf(false) }
 
         Card(
-            modifier = modifier.fillMaxWidth()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = { onExpand() })
-                }
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onDragStart = {
-                            totalDragY = 0f
-                            isSwiping = false
-                        },
-                        onDragEnd = {
-                            totalDragY = 0f
-                            isSwiping = false
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .pointerInput(Unit) { detectTapGestures(onTap = { onExpand() }) }
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures(
+                            onDragStart = {
+                                totalDragY = 0f
+                                isSwiping = false
+                            },
+                            onDragEnd = {
+                                totalDragY = 0f
+                                isSwiping = false
+                            },
+                        ) { change, dragAmount ->
+                            change.consume()
+                            totalDragY += dragAmount
+                            if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
+                                onExpand()
+                                isSwiping = true
+                            }
                         }
-                    ) { change, dragAmount ->
-                        change.consume()
-                        totalDragY += dragAmount
-                        if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
-                            onExpand()
-                            isSwiping = true
-                        }
-                    }
-                },
+                    },
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
                 MaterialTheme.shapes.extraSmall.copy(

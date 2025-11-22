@@ -3,7 +3,6 @@ package dev.quanghuy.mpcareal.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -16,9 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
 import dev.quanghuy.mpcareal.components.MediaPlaybackControlBar
 import dev.quanghuy.mpcareal.data.sampleTracks
 import dev.quanghuy.mpcareal.screens.HomeScreen
@@ -27,6 +24,7 @@ import dev.quanghuy.mpcareal.screens.NowPlayingScreen
 import dev.quanghuy.mpcareal.screens.PersonalScreen
 import dev.quanghuy.mpcareal.screens.SearchScreen
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(
     androidx.compose.material3.ExperimentalMaterial3Api::class,
@@ -155,9 +153,7 @@ fun AppNavigation() {
 
     // Modal Bottom Sheet for expanded player
     if (playbackViewModel.isPlayerExpanded) {
-        LaunchedEffect(Unit) {
-            scope.launch { sheetState.expand() }
-        }
+        LaunchedEffect(Unit) { scope.launch { sheetState.expand() } }
         ModalBottomSheet(
             onDismissRequest = { playbackViewModel.togglePlayerExpanded() },
             sheetState = sheetState,
