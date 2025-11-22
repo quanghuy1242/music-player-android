@@ -158,6 +158,7 @@ fun AppNavigation() {
     FullscreenNowPlayingOverlay(
         show = playbackViewModel.isPlayerExpanded,
         onDismiss = { playbackViewModel.togglePlayerExpanded() },
+        startOnReady = playbackViewModel.miniArtBounds != null,
     ) { progress ->
         NowPlayingScreen(
             playbackViewModel,

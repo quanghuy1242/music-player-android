@@ -1,7 +1,6 @@
 package dev.quanghuy.mpcareal.screens
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +31,7 @@ import kotlinx.coroutines.launch
 fun FullscreenNowPlayingOverlay(
     show: Boolean,
     onDismiss: () -> Unit,
+    startOnReady: Boolean = true,
     content: @Composable (Float) -> Unit,
 ) {
     if (!show) return
@@ -43,21 +43,21 @@ fun FullscreenNowPlayingOverlay(
     val scope = rememberCoroutineScope()
 
     var isLeaving by remember { mutableStateOf(false) }
-    val progressTarget =
-        when {
-            isLeaving -> 0f
-            show -> 1f
-            else -> 0f
-        }
-    val progress by animateFloatAsState(targetValue = progressTarget, animationSpec = tween(320))
+    val progressAnim = remember { Animatable(0f) }
+    val progress = progressAnim.value
     val offsetYValue = (1f - progress) * screenHeightPx + dragOffset.value
     val scrimAlpha = (progress * 0.6f * (1f - dragOffset.value / screenHeightPx)).coerceIn(0f, 0.6f)
 
-    // Trigger parent onDismiss when the exit animation finishes
-    LaunchedEffect(progress) {
-        if (isLeaving && progress == 0f) {
+    // Entrance: on show true animate in. Exit: animate out when isLeaving true; call onDismiss
+    // after animation completes.
+    LaunchedEffect(show, isLeaving, startOnReady) {
+        if (isLeaving) {
+            progressAnim.animateTo(0f, animationSpec = tween(durationMillis = 220))
             onDismiss()
             isLeaving = false
+        } else if (show && startOnReady) {
+            progressAnim.snapTo(0f)
+            progressAnim.animateTo(1f, animationSpec = tween(durationMillis = 320))
         }
     }
 

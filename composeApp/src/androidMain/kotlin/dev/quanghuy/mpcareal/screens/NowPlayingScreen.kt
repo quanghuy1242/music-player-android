@@ -5,6 +5,8 @@ package dev.quanghuy.mpcareal.screens
 // import androidx.compose.ui.graphics.Color (duplicate removed)
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -158,27 +160,39 @@ fun NowPlayingScreen(
                                     var fullArtW by remember { mutableFloatStateOf(0f) }
                                     var fullArtH by remember { mutableFloatStateOf(0f) }
                                     val mini = playbackViewModel.miniArtBounds
-                                    var translationX: Float
-                                    var translationY: Float
-                                    var scale: Float
+                                    val (targetTranslationX, targetTranslationY, targetScale) =
+                                        if (mini == null || fullArtW == 0f || fullArtH == 0f) {
+                                            Triple(0f, 0f, 1f)
+                                        } else {
+                                            val fullCenterX = fullArtX + fullArtW / 2f
+                                            val fullCenterY = fullArtY + fullArtH / 2f
+                                            val miniCenterX = mini.x + mini.width / 2f
+                                            val miniCenterY = mini.y + mini.height / 2f
+                                            // values will return via the Triple below
+                                            val startScale =
+                                                if (fullArtW > 0f) (mini.width / fullArtW) else 1f
+                                            Triple(
+                                                (miniCenterX - fullCenterX) * (1f - sheetProgress),
+                                                (miniCenterY - fullCenterY) * (1f - sheetProgress),
+                                                startScale + (1f - startScale) * sheetProgress,
+                                            )
+                                        }
 
-                                    if (mini == null || fullArtW == 0f || fullArtH == 0f) {
-                                        translationX = 0f
-                                        translationY = 0f
-                                        scale = 1f
-                                    } else {
-                                        val fullCenterX = fullArtX + fullArtW / 2f
-                                        val fullCenterY = fullArtY + fullArtH / 2f
-                                        val miniCenterX = mini.x + mini.width / 2f
-                                        val miniCenterY = mini.y + mini.height / 2f
-                                        translationX =
-                                            (miniCenterX - fullCenterX) * (1f - sheetProgress)
-                                        translationY =
-                                            (miniCenterY - fullCenterY) * (1f - sheetProgress)
-                                        val startScale =
-                                            if (fullArtW > 0f) (mini.width / fullArtW) else 1f
-                                        scale = startScale + (1f - startScale) * sheetProgress
-                                    }
+                                    val animatedTx by
+                                        animateFloatAsState(
+                                            targetValue = targetTranslationX,
+                                            animationSpec = tween(240),
+                                        )
+                                    val animatedTy by
+                                        animateFloatAsState(
+                                            targetValue = targetTranslationY,
+                                            animationSpec = tween(240),
+                                        )
+                                    val animatedScale by
+                                        animateFloatAsState(
+                                            targetValue = targetScale,
+                                            animationSpec = tween(240),
+                                        )
 
                                     AsyncImage(
                                         model = currentTrack.imageUrl,
@@ -194,10 +208,10 @@ fun NowPlayingScreen(
                                                     fullArtH = coords.size.height.toFloat()
                                                 }
                                                 .graphicsLayer {
-                                                    translationX = translationX
-                                                    translationY = translationY
-                                                    scaleX = scale
-                                                    scaleY = scale
+                                                    translationX = animatedTx
+                                                    translationY = animatedTy
+                                                    scaleX = animatedScale
+                                                    scaleY = animatedScale
                                                 },
                                         contentScale = ContentScale.Crop,
                                     )
