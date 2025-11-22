@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +28,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+
 @Composable
 fun FullscreenNowPlayingOverlay(
     show: Boolean,
@@ -43,11 +44,12 @@ fun FullscreenNowPlayingOverlay(
     val scope = rememberCoroutineScope()
 
     var isLeaving by remember { mutableStateOf(false) }
-    val progressTarget = when {
-        isLeaving -> 0f
-        show -> 1f
-        else -> 0f
-    }
+    val progressTarget =
+        when {
+            isLeaving -> 0f
+            show -> 1f
+            else -> 0f
+        }
     val progress by animateFloatAsState(targetValue = progressTarget, animationSpec = tween(320))
     val offsetYValue = (1f - progress) * screenHeightPx + dragOffset.value
     val scrimAlpha = (progress * 0.6f * (1f - dragOffset.value / screenHeightPx)).coerceIn(0f, 0.6f)
@@ -87,16 +89,24 @@ fun FullscreenNowPlayingOverlay(
                                 onDrag = { change, dragAmount ->
                                     change.consume()
                                     scope.launch {
-                                        val next = (dragOffset.value + dragAmount.y).coerceIn(0f, screenHeightPx)
+                                        val next =
+                                            (dragOffset.value + dragAmount.y).coerceIn(
+                                                0f,
+                                                screenHeightPx,
+                                            )
                                         dragOffset.snapTo(next)
                                     }
                                 },
                                 onDragEnd = {
                                     scope.launch {
-                                        val combined = (1f - progress) * screenHeightPx + dragOffset.value
+                                        val combined =
+                                            (1f - progress) * screenHeightPx + dragOffset.value
                                         val shouldDismiss = combined > screenHeightPx * 0.25f
                                         if (shouldDismiss) {
-                                            dragOffset.animateTo(screenHeightPx, animationSpec = tween(200))
+                                            dragOffset.animateTo(
+                                                screenHeightPx,
+                                                animationSpec = tween(200),
+                                            )
                                             isLeaving = true
                                         } else {
                                             dragOffset.animateTo(0f, animationSpec = tween(180))

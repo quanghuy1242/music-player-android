@@ -4,6 +4,7 @@ package dev.quanghuy.mpcareal.screens
 // Using Modifier.blur for cross-platform consistent blur behavior
 // import androidx.compose.ui.graphics.Color (duplicate removed)
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.*
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -135,192 +137,237 @@ fun NowPlayingScreen(
                     0 -> {
                         // Now playing content
                         if (currentTrack != null) {
-                            val artSize = lerp(72.dp, 300.dp, sheetProgress)
-                            AsyncImage(
-                                model = currentTrack.imageUrl,
-                                contentDescription = currentTrack.title,
-                                modifier = Modifier.size(artSize).clip(MaterialTheme.shapes.medium),
-                                contentScale = ContentScale.Crop,
-                            )
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            Text(
-                                text = currentTrack.title,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = Color.White,
-                            )
-                            Text(
-                                text = currentTrack.artist,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White.copy(alpha = 0.9f),
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // tools labeled button toolbar above slider (horizontally scrollable)
-                            val tools =
-                                listOf(
-                                    "Sleep" to Icons.Filled.Schedule,
-                                    "Favorite" to Icons.Filled.Favorite,
-                                    "Download" to Icons.Filled.Download,
-                                    "Like" to Icons.Filled.FavoriteBorder,
-                                    "Share" to Icons.Filled.Share,
-                                    "Save" to Icons.Filled.Save,
-                                    "Add" to Icons.Filled.Add,
-                                    "More" to Icons.Filled.MoreHoriz,
-                                )
-
-                            LazyRow(
-                                modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
+                            val targetArtSize = lerp(48.dp, 300.dp, sheetProgress)
+                            val artSize by animateDpAsState(targetValue = targetArtSize)
+                            val contentAlignment =
+                                if (sheetProgress > 0.85f) Alignment.Center else Alignment.TopCenter
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = contentAlignment,
                             ) {
-                                items(tools) { tool ->
-                                    OutlinedButton(
-                                        onClick = { /* TODO: implement action */ },
+                                Column(
+                                    modifier = Modifier.wrapContentHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    AsyncImage(
+                                        model = currentTrack.imageUrl,
+                                        contentDescription = currentTrack.title,
                                         modifier =
-                                            Modifier.height(
-                                                    ButtonDefaults.ExtraSmallContainerHeight
-                                                )
-                                                .semantics { role = Role.Button },
-                                        shapes = ButtonDefaults.shapes(),
-                                        contentPadding =
-                                            PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                                        colors =
-                                            ButtonDefaults.outlinedButtonColors(
-                                                contentColor = LocalContentColor.current
-                                            ),
-                                        border =
-                                            BorderStroke(
-                                                1.dp,
-                                                LocalContentColor.current.copy(alpha = 0.18f),
-                                            ),
+                                            Modifier.size(artSize)
+                                                .clip(MaterialTheme.shapes.medium),
+                                        contentScale = ContentScale.Crop,
+                                    )
+
+                                    Spacer(modifier = Modifier.height(24.dp))
+
+                                    // Album title left-aligned, artist smaller + subdued
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(0.85f),
+                                        horizontalAlignment = Alignment.Start,
                                     ) {
-                                        Icon(
-                                            imageVector = tool.second,
-                                            contentDescription = tool.first,
-                                            modifier =
-                                                Modifier.size(ButtonDefaults.ExtraSmallIconSize),
-                                            tint = LocalContentColor.current,
-                                        )
-                                        Spacer(
-                                            modifier =
-                                                Modifier.width(ButtonDefaults.ExtraSmallIconSpacing)
+                                        Text(
+                                            text = currentTrack.title,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Start,
+                                            modifier = Modifier.padding(top = 12.dp),
+                                            color = Color.White,
                                         )
                                         Text(
-                                            text = tool.first,
-                                            style =
-                                                ButtonDefaults.textStyleFor(
-                                                    ButtonDefaults.ExtraSmallContainerHeight
-                                                ),
-                                            color = LocalContentColor.current,
+                                            text = currentTrack.artist,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Start,
+                                            color = Color.White,
                                         )
                                     }
-                                }
-                            }
 
-                            Spacer(modifier = Modifier.height(20.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
 
-                            // Seek bar
-                            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)) {
-                                Slider(
-                                    value = progress,
-                                    onValueChange = { /* TODO: Implement seek */ },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                ) {
-                                    Text(
-                                        text = "0:00", // Placeholder
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White.copy(alpha = 0.8f),
-                                    )
-                                    Text(
-                                        text = "3:45", // Placeholder duration
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color.White.copy(alpha = 0.8f),
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(24.dp))
-
-                            // Playback controls with shuffle and repeat
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                // shuffle
-                                IconButton(onClick = { isShuffleEnabled = !isShuffleEnabled }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Shuffle,
-                                        contentDescription = "Shuffle",
-                                        tint =
-                                            if (isShuffleEnabled) MaterialTheme.colorScheme.primary
-                                            else LocalContentColor.current,
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(8.dp))
-
-                                // prev / play / next row grouped
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    IconButton(onClick = { playbackViewModel.previousTrack() }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.SkipPrevious,
-                                            contentDescription = "Previous",
-                                            modifier = Modifier.size(48.dp),
+                                    // tools labeled button toolbar above slider (horizontally
+                                    // scrollable)
+                                    val tools =
+                                        listOf(
+                                            "Sleep" to Icons.Filled.Schedule,
+                                            "Favorite" to Icons.Filled.Favorite,
+                                            "Download" to Icons.Filled.Download,
+                                            "Like" to Icons.Filled.FavoriteBorder,
+                                            "Share" to Icons.Filled.Share,
+                                            "Save" to Icons.Filled.Save,
+                                            "Add" to Icons.Filled.Add,
+                                            "More" to Icons.Filled.MoreHoriz,
                                         )
-                                    }
-                                    IconButton(
-                                        onClick = { playbackViewModel.togglePlayPause() },
+
+                                    LazyRow(
                                         modifier =
-                                            Modifier.size(72.dp)
-                                                .background(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    CircleShape,
-                                                ),
+                                            Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp),
                                     ) {
-                                        Icon(
-                                            imageVector =
-                                                if (isPlaying) Icons.Filled.Pause
-                                                else Icons.Filled.PlayArrow,
-                                            contentDescription = if (isPlaying) "Pause" else "Play",
-                                            modifier = Modifier.size(48.dp),
-                                            tint = MaterialTheme.colorScheme.onPrimary,
-                                        )
+                                        items(tools) { tool ->
+                                            OutlinedButton(
+                                                onClick = { /* TODO: implement action */ },
+                                                modifier =
+                                                    Modifier.height(
+                                                            ButtonDefaults.ExtraSmallContainerHeight
+                                                        )
+                                                        .semantics { role = Role.Button },
+                                                shapes = ButtonDefaults.shapes(),
+                                                contentPadding =
+                                                    PaddingValues(
+                                                        horizontal = 8.dp,
+                                                        vertical = 0.dp,
+                                                    ),
+                                                colors =
+                                                    ButtonDefaults.outlinedButtonColors(
+                                                        contentColor = LocalContentColor.current
+                                                    ),
+                                                border =
+                                                    BorderStroke(
+                                                        1.dp,
+                                                        LocalContentColor.current.copy(
+                                                            alpha = 0.18f
+                                                        ),
+                                                    ),
+                                            ) {
+                                                Icon(
+                                                    imageVector = tool.second,
+                                                    contentDescription = tool.first,
+                                                    modifier =
+                                                        Modifier.size(
+                                                            ButtonDefaults.ExtraSmallIconSize
+                                                        ),
+                                                    tint = LocalContentColor.current,
+                                                )
+                                                Spacer(
+                                                    modifier =
+                                                        Modifier.width(
+                                                            ButtonDefaults.ExtraSmallIconSpacing
+                                                        )
+                                                )
+                                                Text(
+                                                    text = tool.first,
+                                                    style =
+                                                        ButtonDefaults.textStyleFor(
+                                                            ButtonDefaults.ExtraSmallContainerHeight
+                                                        ),
+                                                    color = LocalContentColor.current,
+                                                )
+                                            }
+                                        }
                                     }
-                                    IconButton(onClick = { playbackViewModel.nextTrack() }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.SkipNext,
-                                            contentDescription = "Next",
-                                            modifier = Modifier.size(48.dp),
+
+                                    Spacer(modifier = Modifier.height(20.dp))
+
+                                    // Seek bar
+                                    Column(
+                                        modifier =
+                                            Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+                                    ) {
+                                        Slider(
+                                            value = progress,
+                                            onValueChange = { /* TODO: Implement seek */ },
+                                            modifier = Modifier.fillMaxWidth(),
                                         )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                        ) {
+                                            Text(
+                                                text = "0:00", // Placeholder
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                            )
+                                            Text(
+                                                text = "3:45", // Placeholder duration
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                            )
+                                        }
                                     }
-                                }
 
-                                Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.height(24.dp))
 
-                                // repeat
-                                IconButton(onClick = { repeatMode = (repeatMode + 1) % 3 }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Repeat,
-                                        contentDescription = "Repeat",
-                                        tint =
-                                            if (repeatMode != 0) MaterialTheme.colorScheme.primary
-                                            else LocalContentColor.current,
-                                    )
+                                    // Playback controls with shuffle and repeat
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center,
+                                    ) {
+                                        // shuffle
+                                        IconButton(
+                                            onClick = { isShuffleEnabled = !isShuffleEnabled }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Shuffle,
+                                                contentDescription = "Shuffle",
+                                                tint =
+                                                    if (isShuffleEnabled)
+                                                        MaterialTheme.colorScheme.primary
+                                                    else LocalContentColor.current,
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        // prev / play / next row grouped
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            IconButton(
+                                                onClick = { playbackViewModel.previousTrack() }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.SkipPrevious,
+                                                    contentDescription = "Previous",
+                                                    modifier = Modifier.size(48.dp),
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { playbackViewModel.togglePlayPause() },
+                                                modifier =
+                                                    Modifier.size(72.dp)
+                                                        .background(
+                                                            MaterialTheme.colorScheme.primary,
+                                                            CircleShape,
+                                                        ),
+                                            ) {
+                                                Icon(
+                                                    imageVector =
+                                                        if (isPlaying) Icons.Filled.Pause
+                                                        else Icons.Filled.PlayArrow,
+                                                    contentDescription =
+                                                        if (isPlaying) "Pause" else "Play",
+                                                    modifier = Modifier.size(48.dp),
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { playbackViewModel.nextTrack() }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.SkipNext,
+                                                    contentDescription = "Next",
+                                                    modifier = Modifier.size(48.dp),
+                                                )
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        // repeat
+                                        IconButton(
+                                            onClick = { repeatMode = (repeatMode + 1) % 3 }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Repeat,
+                                                contentDescription = "Repeat",
+                                                tint =
+                                                    if (repeatMode != 0)
+                                                        MaterialTheme.colorScheme.primary
+                                                    else LocalContentColor.current,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         } else {
