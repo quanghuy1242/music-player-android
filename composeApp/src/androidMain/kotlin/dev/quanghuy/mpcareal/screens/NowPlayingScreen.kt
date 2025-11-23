@@ -4,15 +4,15 @@ package dev.quanghuy.mpcareal.screens
 // Using Modifier.blur for cross-platform consistent blur behavior
 // import androidx.compose.ui.graphics.Color (duplicate removed)
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -29,16 +29,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.*
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.*
@@ -48,19 +45,28 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalSharedTransitionApi::class,
+)
 @Composable
 fun NowPlayingScreen(
     playbackViewModel: PlaybackViewModel,
     modifier: Modifier = Modifier,
-    sheetProgress: Float = 1f, // 0f collapsed, 1f expanded
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
+    // Handle back press to collapse the player
+    BackHandler(enabled = playbackViewModel.isPlayerExpanded) {
+        playbackViewModel.togglePlayerExpanded()
+    }
+
     val currentTrack = playbackViewModel.currentTrack
     val isPlaying = playbackViewModel.isPlaying
     val progress =
@@ -73,7 +79,24 @@ fun NowPlayingScreen(
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    // Swipe down to dismiss logic
+    var totalDragY by remember { mutableFloatStateOf(0f) }
+    val swipeModifier =
+        Modifier.pointerInput(Unit) {
+            detectVerticalDragGestures(
+                onDragStart = { totalDragY = 0f },
+                onDragEnd = { totalDragY = 0f },
+            ) { change, dragAmount ->
+                change.consume()
+                totalDragY += dragAmount
+                if (totalDragY > 150) { // Threshold for swipe down
+                    playbackViewModel.togglePlayerExpanded()
+                    totalDragY = 0f // Reset to avoid multiple triggers
+                }
+            }
+        }
+
+    Box(modifier = modifier.fillMaxSize().then(swipeModifier)) {
         // background: album image if available
         if (currentTrack != null) {
             val bgModifier = Modifier.fillMaxSize().blur(60.dp)
@@ -167,80 +190,41 @@ fun NowPlayingScreen(
                         0 -> {
                             // Now playing content
                             if (currentTrack != null) {
-                                val targetArtSize = lerp(48.dp, 300.dp, sheetProgress)
-                                val artSize by animateDpAsState(targetValue = targetArtSize)
-                                val contentAlignment =
-                                    if (sheetProgress > 0.85f) Alignment.Center
-                                    else Alignment.TopCenter
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = contentAlignment,
+                                    contentAlignment = Alignment.Center,
                                 ) {
                                     Column(
                                         modifier = Modifier.wrapContentHeight(),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                     ) {
-                                        var fullArtX by remember { mutableFloatStateOf(0f) }
-                                        var fullArtY by remember { mutableFloatStateOf(0f) }
-                                        var fullArtW by remember { mutableFloatStateOf(0f) }
-                                        var fullArtH by remember { mutableFloatStateOf(0f) }
-                                        val mini = playbackViewModel.miniArtBounds
-                                        val (targetTranslationX, targetTranslationY, targetScale) =
-                                            if (mini == null || fullArtW == 0f || fullArtH == 0f) {
-                                                Triple(0f, 0f, 1f)
-                                            } else {
-                                                val fullCenterX = fullArtX + fullArtW / 2f
-                                                val fullCenterY = fullArtY + fullArtH / 2f
-                                                val miniCenterX = mini.x + mini.width / 2f
-                                                val miniCenterY = mini.y + mini.height / 2f
-                                                // values will return via the Triple below
-                                                val startScale =
-                                                    if (fullArtW > 0f) (mini.width / fullArtW)
-                                                    else 1f
-                                                Triple(
-                                                    (miniCenterX - fullCenterX) *
-                                                        (1f - sheetProgress),
-                                                    (miniCenterY - fullCenterY) *
-                                                        (1f - sheetProgress),
-                                                    startScale + (1f - startScale) * sheetProgress,
-                                                )
-                                            }
-
-                                        val animatedTx by
-                                            animateFloatAsState(
-                                                targetValue = targetTranslationX,
-                                                animationSpec = tween(240),
-                                            )
-                                        val animatedTy by
-                                            animateFloatAsState(
-                                                targetValue = targetTranslationY,
-                                                animationSpec = tween(240),
-                                            )
-                                        val animatedScale by
-                                            animateFloatAsState(
-                                                targetValue = targetScale,
-                                                animationSpec = tween(240),
-                                            )
+                                        val artModifier =
+                                            Modifier.size(300.dp)
+                                                .clip(MaterialTheme.shapes.medium)
+                                                .run {
+                                                    if (
+                                                        sharedTransitionScope != null &&
+                                                            animatedVisibilityScope != null
+                                                    ) {
+                                                        with(sharedTransitionScope) {
+                                                            sharedElement(
+                                                                state =
+                                                                    rememberSharedContentState(
+                                                                        key = "album_art"
+                                                                    ),
+                                                                animatedVisibilityScope =
+                                                                    animatedVisibilityScope,
+                                                            )
+                                                        }
+                                                    } else {
+                                                        this
+                                                    }
+                                                }
 
                                         AsyncImage(
                                             model = currentTrack.imageUrl,
                                             contentDescription = currentTrack.title,
-                                            modifier =
-                                                Modifier.size(artSize)
-                                                    .clip(MaterialTheme.shapes.medium)
-                                                    .onGloballyPositioned { coords ->
-                                                        val pos = coords.positionInWindow()
-                                                        fullArtX = pos.x
-                                                        fullArtY = pos.y
-                                                        fullArtW = coords.size.width.toFloat()
-                                                        fullArtH = coords.size.height.toFloat()
-                                                    }
-                                                    .graphicsLayer {
-                                                        translationX = animatedTx
-                                                        translationY = animatedTy
-                                                        scaleX = animatedScale
-                                                        scaleY = animatedScale
-                                                    },
+                                            modifier = artModifier,
                                             contentScale = ContentScale.Crop,
                                         )
 
@@ -251,19 +235,64 @@ fun NowPlayingScreen(
                                             modifier = Modifier.fillMaxWidth(0.85f),
                                             horizontalAlignment = Alignment.Start,
                                         ) {
+                                            val titleModifier =
+                                                Modifier.run {
+                                                    if (
+                                                        sharedTransitionScope != null &&
+                                                            animatedVisibilityScope != null
+                                                    ) {
+                                                        with(sharedTransitionScope) {
+                                                            sharedElement(
+                                                                state =
+                                                                    rememberSharedContentState(
+                                                                        key = "track_title"
+                                                                    ),
+                                                                animatedVisibilityScope =
+                                                                    animatedVisibilityScope,
+                                                            )
+                                                        }
+                                                    } else {
+                                                        this
+                                                    }
+                                                }
+
                                             Text(
                                                 text = currentTrack.title,
                                                 style = MaterialTheme.typography.headlineSmall,
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.Start,
-                                                modifier = Modifier.padding(top = 12.dp),
+                                                modifier =
+                                                    Modifier.padding(top = 12.dp).then(
+                                                        titleModifier
+                                                    ),
                                                 color = Color.White,
                                             )
+                                            val artistModifier =
+                                                Modifier.run {
+                                                    if (
+                                                        sharedTransitionScope != null &&
+                                                            animatedVisibilityScope != null
+                                                    ) {
+                                                        with(sharedTransitionScope) {
+                                                            sharedElement(
+                                                                state =
+                                                                    rememberSharedContentState(
+                                                                        key = "track_artist"
+                                                                    ),
+                                                                animatedVisibilityScope =
+                                                                    animatedVisibilityScope,
+                                                            )
+                                                        }
+                                                    } else {
+                                                        this
+                                                    }
+                                                }
                                             Text(
                                                 text = currentTrack.artist,
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 textAlign = TextAlign.Start,
                                                 color = Color.White,
+                                                modifier = artistModifier,
                                             )
                                         }
 
@@ -412,25 +441,67 @@ fun NowPlayingScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                             ) {
+                                                val prevModifier =
+                                                    Modifier.size(48.dp).run {
+                                                        if (
+                                                            sharedTransitionScope != null &&
+                                                                animatedVisibilityScope != null
+                                                        ) {
+                                                            with(sharedTransitionScope) {
+                                                                sharedElement(
+                                                                    state =
+                                                                        rememberSharedContentState(
+                                                                            key = "btn_prev"
+                                                                        ),
+                                                                    animatedVisibilityScope =
+                                                                        animatedVisibilityScope,
+                                                                )
+                                                            }
+                                                        } else {
+                                                            this
+                                                        }
+                                                    }
                                                 IconButton(
                                                     onClick = { playbackViewModel.previousTrack() }
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Filled.SkipPrevious,
                                                         contentDescription = "Previous",
-                                                        modifier = Modifier.size(48.dp),
+                                                        modifier = prevModifier,
                                                     )
                                                 }
+                                                val playModifier =
+                                                    Modifier.size(72.dp)
+                                                        .background(
+                                                            MaterialTheme.colorScheme.primary,
+                                                            CircleShape,
+                                                        )
+                                                        .run {
+                                                            if (
+                                                                sharedTransitionScope != null &&
+                                                                    animatedVisibilityScope != null
+                                                            ) {
+                                                                with(sharedTransitionScope) {
+                                                                    sharedElement(
+                                                                        state =
+                                                                            rememberSharedContentState(
+                                                                                key =
+                                                                                    "btn_play_pause"
+                                                                            ),
+                                                                        animatedVisibilityScope =
+                                                                            animatedVisibilityScope,
+                                                                    )
+                                                                }
+                                                            } else {
+                                                                this
+                                                            }
+                                                        }
+
                                                 IconButton(
                                                     onClick = {
                                                         playbackViewModel.togglePlayPause()
                                                     },
-                                                    modifier =
-                                                        Modifier.size(72.dp)
-                                                            .background(
-                                                                MaterialTheme.colorScheme.primary,
-                                                                CircleShape,
-                                                            ),
+                                                    modifier = playModifier,
                                                 ) {
                                                     Icon(
                                                         imageVector =
@@ -442,13 +513,33 @@ fun NowPlayingScreen(
                                                         tint = MaterialTheme.colorScheme.onPrimary,
                                                     )
                                                 }
+                                                val nextModifier =
+                                                    Modifier.size(48.dp).run {
+                                                        if (
+                                                            sharedTransitionScope != null &&
+                                                                animatedVisibilityScope != null
+                                                        ) {
+                                                            with(sharedTransitionScope) {
+                                                                sharedElement(
+                                                                    state =
+                                                                        rememberSharedContentState(
+                                                                            key = "btn_next"
+                                                                        ),
+                                                                    animatedVisibilityScope =
+                                                                        animatedVisibilityScope,
+                                                                )
+                                                            }
+                                                        } else {
+                                                            this
+                                                        }
+                                                    }
                                                 IconButton(
                                                     onClick = { playbackViewModel.nextTrack() }
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Filled.SkipNext,
                                                         contentDescription = "Next",
-                                                        modifier = Modifier.size(48.dp),
+                                                        modifier = nextModifier,
                                                     )
                                                 }
                                             }

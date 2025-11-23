@@ -3,6 +3,9 @@ package dev.quanghuy.mpcareal.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -15,14 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.models.Track
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MediaPlaybackControlBar(
     currentTrack: Track?,
@@ -32,7 +34,8 @@ fun MediaPlaybackControlBar(
     onPrevious: () -> Unit,
     onExpand: () -> Unit,
     modifier: Modifier = Modifier,
-    onMiniArtBoundsChanged: ((Float, Float, Float, Float) -> Unit)? = null,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
 ) {
     val progress =
         if (currentTrack != null) {
@@ -95,21 +98,26 @@ fun MediaPlaybackControlBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     // Album cover
+                    val artModifier =
+                        Modifier.size(48.dp).clip(MaterialTheme.shapes.small).run {
+                            if (
+                                sharedTransitionScope != null && animatedVisibilityScope != null
+                            ) {
+                                with(sharedTransitionScope) {
+                                    sharedElement(
+                                        state = rememberSharedContentState(key = "album_art"),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    )
+                                }
+                            } else {
+                                this
+                            }
+                        }
+
                     AsyncImage(
                         model = currentTrack.imageUrl,
                         contentDescription = currentTrack.title,
-                        modifier =
-                            Modifier.size(48.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .onGloballyPositioned { coords ->
-                                    val pos = coords.positionInWindow()
-                                    onMiniArtBoundsChanged?.invoke(
-                                        pos.x,
-                                        pos.y,
-                                        coords.size.width.toFloat(),
-                                        coords.size.height.toFloat(),
-                                    )
-                                },
+                        modifier = artModifier,
                         contentScale = ContentScale.Crop,
                     )
 
@@ -117,19 +125,52 @@ fun MediaPlaybackControlBar(
 
                     // Track info
                     Column(modifier = Modifier.weight(1f)) {
+                        val titleModifier =
+                            Modifier.run {
+                                if (
+                                    sharedTransitionScope != null && animatedVisibilityScope != null
+                                ) {
+                                    with(sharedTransitionScope) {
+                                        sharedElement(
+                                            state = rememberSharedContentState(key = "track_title"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                    }
+                                } else {
+                                    this
+                                }
+                            }
                         Text(
                             text = currentTrack.title,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = titleModifier,
                         )
+                        val artistModifier =
+                            Modifier.run {
+                                if (
+                                    sharedTransitionScope != null && animatedVisibilityScope != null
+                                ) {
+                                    with(sharedTransitionScope) {
+                                        sharedElement(
+                                            state =
+                                                rememberSharedContentState(key = "track_artist"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                    }
+                                } else {
+                                    this
+                                }
+                            }
                         Text(
                             text = currentTrack.artist,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = artistModifier,
                         )
                     }
 
@@ -137,19 +178,51 @@ fun MediaPlaybackControlBar(
 
                     // Playback controls
                     Row {
+                        val prevModifier =
+                            Modifier.size(24.dp).run {
+                                if (
+                                    sharedTransitionScope != null && animatedVisibilityScope != null
+                                ) {
+                                    with(sharedTransitionScope) {
+                                        sharedElement(
+                                            state = rememberSharedContentState(key = "btn_prev"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                    }
+                                } else {
+                                    this
+                                }
+                            }
                         IconButton(onClick = onPrevious) {
                             Icon(
                                 imageVector = Icons.Filled.SkipPrevious,
                                 contentDescription = "Previous",
-                                modifier = Modifier.size(24.dp),
+                                modifier = prevModifier,
                             )
                         }
-                        IconButton(
-                            onClick = onPlayPause,
-                            modifier =
-                                Modifier.size(44.dp)
-                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-                        ) {
+
+                        val playModifier =
+                            Modifier.size(44.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                .run {
+                                    if (
+                                        sharedTransitionScope != null &&
+                                            animatedVisibilityScope != null
+                                    ) {
+                                        with(sharedTransitionScope) {
+                                            sharedElement(
+                                                state =
+                                                    rememberSharedContentState(
+                                                        key = "btn_play_pause"
+                                                    ),
+                                                animatedVisibilityScope = animatedVisibilityScope,
+                                            )
+                                        }
+                                    } else {
+                                        this
+                                    }
+                                }
+                        IconButton(onClick = onPlayPause, modifier = playModifier) {
                             Icon(
                                 imageVector =
                                     if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
@@ -158,11 +231,27 @@ fun MediaPlaybackControlBar(
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
+
+                        val nextModifier =
+                            Modifier.size(24.dp).run {
+                                if (
+                                    sharedTransitionScope != null && animatedVisibilityScope != null
+                                ) {
+                                    with(sharedTransitionScope) {
+                                        sharedElement(
+                                            state = rememberSharedContentState(key = "btn_next"),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        )
+                                    }
+                                } else {
+                                    this
+                                }
+                            }
                         IconButton(onClick = onNext) {
                             Icon(
                                 imageVector = Icons.Filled.SkipNext,
                                 contentDescription = "Next",
-                                modifier = Modifier.size(24.dp),
+                                modifier = nextModifier,
                             )
                         }
                     }

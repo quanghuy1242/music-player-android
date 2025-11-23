@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.quanghuy.mpcareal.components.MediaPlaybackControlBar
 import dev.quanghuy.mpcareal.data.sampleTracks
-import dev.quanghuy.mpcareal.screens.FullscreenNowPlayingOverlay
 import dev.quanghuy.mpcareal.screens.HomeScreen
 import dev.quanghuy.mpcareal.screens.LibraryScreen
 import dev.quanghuy.mpcareal.screens.NowPlayingScreen
@@ -29,11 +28,11 @@ import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 @OptIn(
     androidx.compose.material3.ExperimentalMaterial3Api::class,
     androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @Composable
 fun AppNavigation() {
     val playbackViewModel: PlaybackViewModel = viewModel<PlaybackViewModel>()
-    val scope = rememberCoroutineScope()
     // using full-screen overlay instead of ModalBottomSheet for Now Playing.
     val navItems =
         listOf(
@@ -54,116 +53,125 @@ fun AppNavigation() {
         }
     }
 
-    Scaffold(
-        floatingActionButton = {
-            // ToggleFloatingActionButton with menu
-            var expanded by rememberSaveable { mutableStateOf(false) }
-            // FAB Menu options (uses Material3 FloatingActionButtonMenu API)
-            FloatingActionButtonMenu(
-                expanded,
-                {
-                    ToggleFloatingActionButton(
-                        checked = expanded,
-                        onCheckedChange = { expanded = !expanded },
-                    ) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
-                    }
-                },
-                Modifier,
-                Alignment.End,
-            ) {
-                // Menu items: use 'icon' parameter (not leadingIcon)
-                FloatingActionButtonMenuItem(
-                    onClick = { /* Handle shuffle action */ },
-                    text = { Text("Shuffle and Play") },
-                    icon = { Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle") },
-                )
-                FloatingActionButtonMenuItem(
-                    onClick = { /* Handle surprise action */ },
-                    text = { Text("Surprise Me") },
-                    icon = { Icon(Icons.Filled.AutoAwesome, contentDescription = "Surprise") },
-                )
-            }
-        },
-        bottomBar = {
-            Column {
-                MediaPlaybackControlBar(
-                    currentTrack = playbackViewModel.currentTrack,
-                    isPlaying = playbackViewModel.isPlaying,
-                    onPlayPause = { playbackViewModel.togglePlayPause() },
-                    onNext = { playbackViewModel.nextTrack() },
-                    onPrevious = { playbackViewModel.previousTrack() },
-                    onExpand = { playbackViewModel.togglePlayerExpanded() },
-                    onMiniArtBoundsChanged = { x, y, w, h ->
-                        playbackViewModel.updateMiniArtBounds(x, y, w, h)
+    SharedTransitionLayout {
+        Scaffold(
+            floatingActionButton = {
+                // ToggleFloatingActionButton with menu
+                var expanded by rememberSaveable { mutableStateOf(false) }
+                // FAB Menu options (uses Material3 FloatingActionButtonMenu API)
+                FloatingActionButtonMenu(
+                    expanded,
+                    {
+                        ToggleFloatingActionButton(
+                            checked = expanded,
+                            onCheckedChange = { expanded = !expanded },
+                        ) {
+                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                        }
                     },
-                )
-
-                // Navigation bar
-                NavigationBar {
-                    navItems.forEachIndexed { index, (label, icon) ->
-                        NavigationBarItem(
-                            selected = selectedIndex == index,
-                            onClick = { selectedIndex = index },
-                            icon = { Icon(icon, contentDescription = label) },
-                            label = { Text(label) },
+                    Modifier,
+                    Alignment.End,
+                ) {
+                    // Menu items: use 'icon' parameter (not leadingIcon)
+                    FloatingActionButtonMenuItem(
+                        onClick = { /* Handle shuffle action */ },
+                        text = { Text("Shuffle and Play") },
+                        icon = { Icon(Icons.Filled.Shuffle, contentDescription = "Shuffle") },
+                    )
+                    FloatingActionButtonMenuItem(
+                        onClick = { /* Handle surprise action */ },
+                        text = { Text("Surprise Me") },
+                        icon = { Icon(Icons.Filled.AutoAwesome, contentDescription = "Surprise") },
+                    )
+                }
+            },
+            bottomBar = {
+                Column {
+                    AnimatedVisibility(
+                        visible = !playbackViewModel.isPlayerExpanded,
+                        enter = fadeIn() + slideInVertically { it },
+                        exit = fadeOut() + slideOutVertically { it },
+                        label = "MiniPlayer",
+                    ) {
+                        MediaPlaybackControlBar(
+                            currentTrack = playbackViewModel.currentTrack,
+                            isPlaying = playbackViewModel.isPlaying,
+                            onPlayPause = { playbackViewModel.togglePlayPause() },
+                            onNext = { playbackViewModel.nextTrack() },
+                            onPrevious = { playbackViewModel.previousTrack() },
+                            onExpand = { playbackViewModel.togglePlayerExpanded() },
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedVisibilityScope = this,
                         )
                     }
-                }
-            }
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AnimatedContent<Int>(
-                targetState = selectedIndex,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        // New screen from right, old to left with spring
-                        slideInHorizontally(
-                            animationSpec = spring(stiffness = Spring.StiffnessLow),
-                            initialOffsetX = { width -> width },
-                        ) togetherWith
-                            slideOutHorizontally(
-                                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                targetOffsetX = { width -> -width },
+
+                    // Navigation bar
+                    NavigationBar {
+                        navItems.forEachIndexed { index, (label, icon) ->
+                            NavigationBarItem(
+                                selected = selectedIndex == index,
+                                onClick = { selectedIndex = index },
+                                icon = { Icon(icon, contentDescription = label) },
+                                label = { Text(label) },
                             )
-                    } else {
-                        // New screen from left, old to right with spring
-                        slideInHorizontally(
-                            animationSpec = spring(stiffness = Spring.StiffnessLow),
-                            initialOffsetX = { width -> -width },
-                        ) togetherWith
-                            slideOutHorizontally(
-                                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                targetOffsetX = { width -> width },
-                            )
+                        }
                     }
-                },
-                label = "ScreenTransition",
-            ) { index ->
-                when (index) {
-                    0 -> LibraryScreen(playbackViewModel)
-                    1 -> HomeScreen(playbackViewModel)
-                    2 -> SearchScreen()
-                    3 -> PersonalScreen()
+                }
+            },
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AnimatedContent<Int>(
+                    targetState = selectedIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            // New screen from right, old to left with spring
+                            slideInHorizontally(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                initialOffsetX = { width -> width },
+                            ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                    targetOffsetX = { width -> -width },
+                                )
+                        } else {
+                            // New screen from left, old to right with spring
+                            slideInHorizontally(
+                                animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                initialOffsetX = { width -> -width },
+                            ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                    targetOffsetX = { width -> width },
+                                )
+                        }
+                    },
+                    label = "ScreenTransition",
+                ) { index ->
+                    when (index) {
+                        0 -> LibraryScreen(playbackViewModel)
+                        1 -> HomeScreen(playbackViewModel)
+                        2 -> SearchScreen()
+                        3 -> PersonalScreen()
+                    }
                 }
             }
         }
-    }
 
-    // Full-screen overlay for expanded player (custom animated dialog with drag-to-dismiss)
-    FullscreenNowPlayingOverlay(
-        show = playbackViewModel.isPlayerExpanded,
-        onDismiss = { playbackViewModel.togglePlayerExpanded() },
-        startOnReady = playbackViewModel.miniArtBounds != null,
-    ) { progress ->
-        NowPlayingScreen(
-            playbackViewModel,
-            modifier = Modifier.fillMaxSize(),
-            sheetProgress = progress,
-        )
+        AnimatedVisibility(
+            visible = playbackViewModel.isPlayerExpanded,
+            enter = fadeIn() + slideInVertically { it / 3 },
+            exit = fadeOut() + slideOutVertically { it },
+            label = "NowPlaying",
+        ) {
+            NowPlayingScreen(
+                playbackViewModel,
+                modifier = Modifier.fillMaxSize(),
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedVisibilityScope = this,
+            )
+        }
     }
 }
