@@ -162,7 +162,7 @@ fun AppNavigation() {
 
         AnimatedVisibility(
             visible = playbackViewModel.isPlayerExpanded,
-            enter = fadeIn() + slideInVertically { it / 3 },
+            enter = fadeIn() + slideInVertically { it },
             exit = fadeOut() + slideOutVertically { it },
             label = "NowPlaying",
         ) {

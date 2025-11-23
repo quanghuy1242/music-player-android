@@ -8,10 +8,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.OverlayClip
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.widthIn
@@ -208,12 +210,16 @@ fun NowPlayingScreen(
                                                     ) {
                                                         with(sharedTransitionScope) {
                                                             sharedElement(
-                                                                state =
+                                                                sharedContentState =
                                                                     rememberSharedContentState(
                                                                         key = "album_art"
                                                                     ),
                                                                 animatedVisibilityScope =
                                                                     animatedVisibilityScope,
+                                                                clipInOverlayDuringTransition =
+                                                                    OverlayClip(
+                                                                        MaterialTheme.shapes.medium
+                                                                    ),
                                                             )
                                                         }
                                                     } else {
@@ -243,7 +249,7 @@ fun NowPlayingScreen(
                                                     ) {
                                                         with(sharedTransitionScope) {
                                                             sharedElement(
-                                                                state =
+                                                                sharedContentState =
                                                                     rememberSharedContentState(
                                                                         key = "track_title"
                                                                     ),
@@ -262,9 +268,8 @@ fun NowPlayingScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 textAlign = TextAlign.Start,
                                                 modifier =
-                                                    Modifier.padding(top = 12.dp).then(
-                                                        titleModifier
-                                                    ),
+                                                    Modifier.padding(top = 12.dp)
+                                                        .then(titleModifier),
                                                 color = Color.White,
                                             )
                                             val artistModifier =
@@ -275,7 +280,7 @@ fun NowPlayingScreen(
                                                     ) {
                                                         with(sharedTransitionScope) {
                                                             sharedElement(
-                                                                state =
+                                                                sharedContentState =
                                                                     rememberSharedContentState(
                                                                         key = "track_artist"
                                                                     ),
@@ -449,7 +454,7 @@ fun NowPlayingScreen(
                                                         ) {
                                                             with(sharedTransitionScope) {
                                                                 sharedElement(
-                                                                    state =
+                                                                    sharedContentState =
                                                                         rememberSharedContentState(
                                                                             key = "btn_prev"
                                                                         ),
@@ -483,7 +488,7 @@ fun NowPlayingScreen(
                                                             ) {
                                                                 with(sharedTransitionScope) {
                                                                     sharedElement(
-                                                                        state =
+                                                                        sharedContentState =
                                                                             rememberSharedContentState(
                                                                                 key =
                                                                                     "btn_play_pause"
@@ -521,7 +526,7 @@ fun NowPlayingScreen(
                                                         ) {
                                                             with(sharedTransitionScope) {
                                                                 sharedElement(
-                                                                    state =
+                                                                    sharedContentState =
                                                                         rememberSharedContentState(
                                                                             key = "btn_next"
                                                                         ),

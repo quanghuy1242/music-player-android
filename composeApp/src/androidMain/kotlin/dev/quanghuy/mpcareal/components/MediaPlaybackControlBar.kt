@@ -1,11 +1,11 @@
 package dev.quanghuy.mpcareal.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -99,14 +99,15 @@ fun MediaPlaybackControlBar(
                 ) {
                     // Album cover
                     val artModifier =
-                        Modifier.size(48.dp).clip(MaterialTheme.shapes.small).run {
-                            if (
-                                sharedTransitionScope != null && animatedVisibilityScope != null
-                            ) {
+                        Modifier.size(48.dp).clip(MaterialTheme.shapes.medium).run {
+                            if (sharedTransitionScope != null && animatedVisibilityScope != null) {
                                 with(sharedTransitionScope) {
                                     sharedElement(
-                                        state = rememberSharedContentState(key = "album_art"),
+                                        sharedContentState =
+                                            rememberSharedContentState(key = "album_art"),
                                         animatedVisibilityScope = animatedVisibilityScope,
+                                        clipInOverlayDuringTransition =
+                                            OverlayClip(MaterialTheme.shapes.medium),
                                     )
                                 }
                             } else {
@@ -132,7 +133,8 @@ fun MediaPlaybackControlBar(
                                 ) {
                                     with(sharedTransitionScope) {
                                         sharedElement(
-                                            state = rememberSharedContentState(key = "track_title"),
+                                            sharedContentState =
+                                                rememberSharedContentState(key = "track_title"),
                                             animatedVisibilityScope = animatedVisibilityScope,
                                         )
                                     }
@@ -155,7 +157,7 @@ fun MediaPlaybackControlBar(
                                 ) {
                                     with(sharedTransitionScope) {
                                         sharedElement(
-                                            state =
+                                            sharedContentState =
                                                 rememberSharedContentState(key = "track_artist"),
                                             animatedVisibilityScope = animatedVisibilityScope,
                                         )
@@ -185,7 +187,8 @@ fun MediaPlaybackControlBar(
                                 ) {
                                     with(sharedTransitionScope) {
                                         sharedElement(
-                                            state = rememberSharedContentState(key = "btn_prev"),
+                                            sharedContentState =
+                                                rememberSharedContentState(key = "btn_prev"),
                                             animatedVisibilityScope = animatedVisibilityScope,
                                         )
                                     }
@@ -211,7 +214,7 @@ fun MediaPlaybackControlBar(
                                     ) {
                                         with(sharedTransitionScope) {
                                             sharedElement(
-                                                state =
+                                                sharedContentState =
                                                     rememberSharedContentState(
                                                         key = "btn_play_pause"
                                                     ),
@@ -239,7 +242,8 @@ fun MediaPlaybackControlBar(
                                 ) {
                                     with(sharedTransitionScope) {
                                         sharedElement(
-                                            state = rememberSharedContentState(key = "btn_next"),
+                                            sharedContentState =
+                                                rememberSharedContentState(key = "btn_next"),
                                             animatedVisibilityScope = animatedVisibilityScope,
                                         )
                                     }
