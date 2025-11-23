@@ -57,4 +57,8 @@ class PlaybackViewModel : ViewModel() {
     fun togglePlayerExpanded() {
         isPlayerExpanded = !isPlayerExpanded
     }
+
+    fun setPlayerExpandedState(expanded: Boolean) {
+        isPlayerExpanded = expanded
+    }
 }

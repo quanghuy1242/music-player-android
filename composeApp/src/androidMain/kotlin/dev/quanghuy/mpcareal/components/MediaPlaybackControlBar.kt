@@ -16,7 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.*
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,8 +53,9 @@ fun MediaPlaybackControlBar(
         var isSwiping by remember { mutableStateOf(false) }
 
         Card(
-            modifier =
-                modifier.fillMaxWidth().clickable(onClick = onExpand).pointerInput(Unit) {
+            modifier = modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
                     detectVerticalDragGestures(
                         onDragStart = {
                             totalDragY = 0f
@@ -59,16 +64,17 @@ fun MediaPlaybackControlBar(
                         onDragEnd = {
                             totalDragY = 0f
                             isSwiping = false
-                        },
+                        }
                     ) { change, dragAmount ->
                         change.consume()
                         totalDragY += dragAmount
-                        if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
+                        if (!isSwiping && totalDragY < -20f) { // Threshold for swipe up
                             onExpand()
                             isSwiping = true
                         }
                     }
-                },
+                }
+                .clickable(onClick = onExpand),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
                 MaterialTheme.shapes.extraSmall.copy(

@@ -10,6 +10,10 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SharedTransitionScope.OverlayClip
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -51,6 +55,7 @@ import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -77,28 +82,54 @@ fun NowPlayingScreen(
     var isShuffleEnabled by rememberSaveable { mutableStateOf(false) }
     var repeatMode by rememberSaveable { mutableStateOf(0) }
 
-    val scope = rememberCoroutineScope()
+    
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
-    // Swipe down to dismiss logic
-    var totalDragY by remember { mutableFloatStateOf(0f) }
+    // Swipe down to dismiss logic: progressive drag with snapping and animation
+    val scope = rememberCoroutineScope()
+    val offsetY = remember { Animatable(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val dismissThreshold = with(density) { 150.dp.toPx() }
+
+    val dragScope = rememberCoroutineScope()
     val swipeModifier =
         Modifier.pointerInput(Unit) {
             detectVerticalDragGestures(
-                onDragStart = { totalDragY = 0f },
-                onDragEnd = { totalDragY = 0f },
+                onDragStart = {
+                    dragOffset = 0f
+                },
+                onDragEnd = {
+                    if (dragOffset > dismissThreshold) {
+                        // trigger collapse immediately so shared element transition can run
+                        playbackViewModel.setPlayerExpandedState(false)
+                        dragScope.launch {
+                            offsetY.snapTo(0f)
+                            dragOffset = 0f
+                        }
+                    } else {
+                        dragScope.launch {
+                            offsetY.animateTo(0f)
+                            dragOffset = 0f
+                        }
+                    }
+                },
             ) { change, dragAmount ->
                 change.consume()
-                totalDragY += dragAmount
-                if (totalDragY > 150) { // Threshold for swipe down
-                    playbackViewModel.togglePlayerExpanded()
-                    totalDragY = 0f // Reset to avoid multiple triggers
-                }
+                dragOffset = (dragOffset + dragAmount).coerceAtLeast(0f)
+                dragScope.launch { offsetY.snapTo(dragOffset.coerceAtMost(screenHeightPx)) }
             }
         }
 
-    Box(modifier = modifier.fillMaxSize().then(swipeModifier)) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .then(swipeModifier)
+            .offset { IntOffset(0, offsetY.value.roundToInt()) }
+    ) {
         // background: album image if available
         if (currentTrack != null) {
             val bgModifier = Modifier.fillMaxSize().blur(60.dp)
