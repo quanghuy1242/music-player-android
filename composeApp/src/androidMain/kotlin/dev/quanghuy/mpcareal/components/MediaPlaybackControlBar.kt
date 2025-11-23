@@ -49,29 +49,19 @@ fun MediaPlaybackControlBar(
         }
 
     if (currentTrack != null) {
-        var totalDragY by remember { mutableFloatStateOf(0f) }
-        var isSwiping by remember { mutableStateOf(false) }
-
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onDragStart = {
-                            totalDragY = 0f
-                            isSwiping = false
-                        },
-                        onDragEnd = {
-                            totalDragY = 0f
-                            isSwiping = false
+                .run {
+                    if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                        with(sharedTransitionScope) {
+                            sharedBounds(
+                                sharedContentState = rememberSharedContentState(key = "player_container"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
                         }
-                    ) { change, dragAmount ->
-                        change.consume()
-                        totalDragY += dragAmount
-                        if (!isSwiping && totalDragY < -20f) { // Threshold for swipe up
-                            onExpand()
-                            isSwiping = true
-                        }
+                    } else {
+                        this
                     }
                 }
                 .clickable(onClick = onExpand),

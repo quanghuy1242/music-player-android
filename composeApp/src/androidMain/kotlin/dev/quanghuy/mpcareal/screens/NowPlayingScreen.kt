@@ -86,49 +86,23 @@ fun NowPlayingScreen(
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
-    // Swipe down to dismiss logic: progressive drag with snapping and animation
     val scope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    val dismissThreshold = with(density) { 150.dp.toPx() }
-
-    val dragScope = rememberCoroutineScope()
-    val swipeModifier =
-        Modifier.pointerInput(Unit) {
-            detectVerticalDragGestures(
-                onDragStart = {
-                    dragOffset = 0f
-                },
-                onDragEnd = {
-                    if (dragOffset > dismissThreshold) {
-                        // trigger collapse immediately so shared element transition can run
-                        playbackViewModel.setPlayerExpandedState(false)
-                        dragScope.launch {
-                            offsetY.snapTo(0f)
-                            dragOffset = 0f
-                        }
-                    } else {
-                        dragScope.launch {
-                            offsetY.animateTo(0f)
-                            dragOffset = 0f
-                        }
-                    }
-                },
-            ) { change, dragAmount ->
-                change.consume()
-                dragOffset = (dragOffset + dragAmount).coerceAtLeast(0f)
-                dragScope.launch { offsetY.snapTo(dragOffset.coerceAtMost(screenHeightPx)) }
-            }
-        }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .then(swipeModifier)
-            .offset { IntOffset(0, offsetY.value.roundToInt()) }
+            .run {
+                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                    with(sharedTransitionScope) {
+                        sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "player_container"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        )
+                    }
+                } else {
+                    this
+                }
+            }
     ) {
         // background: album image if available
         if (currentTrack != null) {
