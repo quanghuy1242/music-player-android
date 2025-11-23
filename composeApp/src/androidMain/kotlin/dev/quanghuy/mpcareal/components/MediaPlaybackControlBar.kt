@@ -2,7 +2,6 @@ package dev.quanghuy.mpcareal.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -16,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,30 +43,29 @@ fun MediaPlaybackControlBar(
         }
 
     if (currentTrack != null) {
-        var totalDragY by remember { mutableFloatStateOf(0f) }
-        var isSwiping by remember { mutableStateOf(false) }
+        val sharedModifier =
+            if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                with(sharedTransitionScope) {
+                    Modifier.sharedBounds(
+                        rememberSharedContentState(key = "container_bounds"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        resizeMode =
+                            SharedTransitionScope.ResizeMode.ScaleToBounds(ContentScale.FillBounds),
+                        clipInOverlayDuringTransition =
+                            OverlayClip(
+                                MaterialTheme.shapes.extraSmall.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp),
+                                )
+                            ),
+                    )
+                }
+            } else {
+                Modifier
+            }
 
         Card(
-            modifier =
-                modifier.fillMaxWidth().clickable(onClick = onExpand).pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onDragStart = {
-                            totalDragY = 0f
-                            isSwiping = false
-                        },
-                        onDragEnd = {
-                            totalDragY = 0f
-                            isSwiping = false
-                        },
-                    ) { change, dragAmount ->
-                        change.consume()
-                        totalDragY += dragAmount
-                        if (!isSwiping && totalDragY < -20) { // Threshold for swipe up
-                            onExpand()
-                            isSwiping = true
-                        }
-                    }
-                },
+            modifier = modifier.fillMaxWidth().then(sharedModifier).clickable(onClick = onExpand),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape =
                 MaterialTheme.shapes.extraSmall.copy(

@@ -12,7 +12,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -22,6 +22,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -37,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.*
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -79,27 +79,28 @@ fun NowPlayingScreen(
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
-    // Swipe down to dismiss logic
-    var totalDragY by remember { mutableFloatStateOf(0f) }
-    val swipeModifier =
-        Modifier.pointerInput(Unit) {
-            detectVerticalDragGestures(
-                onDragStart = { totalDragY = 0f },
-                onDragEnd = { totalDragY = 0f },
-            ) { change, dragAmount ->
-                change.consume()
-                totalDragY += dragAmount
-                if (totalDragY > 150) { // Threshold for swipe down
-                    playbackViewModel.togglePlayerExpanded()
-                    totalDragY = 0f // Reset to avoid multiple triggers
-                }
-            }
-        }
-
-    Box(modifier = modifier.fillMaxSize().then(swipeModifier)) {
+    Box(modifier = modifier.fillMaxSize()) {
         // background: album image if available
         if (currentTrack != null) {
-            val bgModifier = Modifier.fillMaxSize().blur(60.dp)
+            val bgModifier = Modifier.fillMaxSize().blur(60.dp).run {
+                if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                    with(sharedTransitionScope) {
+                        sharedBounds(
+                            rememberSharedContentState(key = "container_bounds"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(ContentScale.FillBounds),
+                            clipInOverlayDuringTransition = OverlayClip(
+                                MaterialTheme.shapes.extraSmall.copy(
+                                    bottomStart = CornerSize(0.dp),
+                                    bottomEnd = CornerSize(0.dp),
+                                )
+                            ),
+                        )
+                    }
+                } else {
+                    this
+                }
+            }
 
             AsyncImage(
                 model = currentTrack.imageUrl,
