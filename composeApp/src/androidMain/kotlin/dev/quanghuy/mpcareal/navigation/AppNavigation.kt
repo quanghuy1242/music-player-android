@@ -123,38 +123,41 @@ fun AppNavigation() {
                 modifier = Modifier.fillMaxSize().padding(paddingValues),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AnimatedContent<Int>(
-                    targetState = selectedIndex,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            // New screen from right, old to left with spring
-                            slideInHorizontally(
-                                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                initialOffsetX = { width -> width },
-                            ) togetherWith
-                                slideOutHorizontally(
+                SharedTransitionLayout {
+                    val innerScope = this
+                    AnimatedContent<Int>(
+                        targetState = selectedIndex,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                // New screen from right, old to left with spring
+                                slideInHorizontally(
                                     animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                    targetOffsetX = { width -> -width },
-                                )
-                        } else {
-                            // New screen from left, old to right with spring
-                            slideInHorizontally(
-                                animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                initialOffsetX = { width -> -width },
-                            ) togetherWith
-                                slideOutHorizontally(
+                                    initialOffsetX = { width -> width },
+                                ) togetherWith
+                                    slideOutHorizontally(
+                                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                        targetOffsetX = { width -> -width },
+                                    )
+                            } else {
+                                // New screen from left, old to right with spring
+                                slideInHorizontally(
                                     animationSpec = spring(stiffness = Spring.StiffnessLow),
-                                    targetOffsetX = { width -> width },
-                                )
+                                    initialOffsetX = { width -> -width },
+                                ) togetherWith
+                                    slideOutHorizontally(
+                                        animationSpec = spring(stiffness = Spring.StiffnessLow),
+                                        targetOffsetX = { width -> width },
+                                    )
+                            }
+                        },
+                        label = "ScreenTransition",
+                    ) { index ->
+                        when (index) {
+                            0 -> LibraryScreen(playbackViewModel, innerScope, this)
+                            1 -> HomeScreen(playbackViewModel)
+                            2 -> SearchScreen()
+                            3 -> PersonalScreen()
                         }
-                    },
-                    label = "ScreenTransition",
-                ) { index ->
-                    when (index) {
-                        0 -> LibraryScreen(playbackViewModel)
-                        1 -> HomeScreen(playbackViewModel)
-                        2 -> SearchScreen()
-                        3 -> PersonalScreen()
                     }
                 }
             }

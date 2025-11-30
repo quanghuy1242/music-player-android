@@ -9,11 +9,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SharedTransitionScope.OverlayClip
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.Animatable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -45,17 +42,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.*
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlin.math.abs
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -82,7 +82,6 @@ fun NowPlayingScreen(
     var isShuffleEnabled by rememberSaveable { mutableStateOf(false) }
     var repeatMode by rememberSaveable { mutableStateOf(0) }
 
-    
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
@@ -99,9 +98,7 @@ fun NowPlayingScreen(
     val swipeModifier =
         Modifier.pointerInput(Unit) {
             detectVerticalDragGestures(
-                onDragStart = {
-                    dragOffset = 0f
-                },
+                onDragStart = { dragOffset = 0f },
                 onDragEnd = {
                     if (dragOffset > dismissThreshold) {
                         // trigger collapse immediately so shared element transition can run
@@ -125,10 +122,10 @@ fun NowPlayingScreen(
         }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .then(swipeModifier)
-            .offset { IntOffset(0, offsetY.value.roundToInt()) }
+        modifier =
+            modifier.fillMaxSize().then(swipeModifier).offset {
+                IntOffset(0, offsetY.value.roundToInt())
+            }
     ) {
         // background: album image if available
         if (currentTrack != null) {
