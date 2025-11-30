@@ -9,7 +9,6 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SharedTransitionScope.OverlayClip
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
@@ -40,21 +39,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.*
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.quanghuy.mpcareal.viewmodel.PlaybackViewModel
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -85,46 +80,27 @@ fun NowPlayingScreen(
     val pagerState = rememberPagerState(initialPage = selectedTab) { 3 }
     LaunchedEffect(pagerState.currentPage) { selectedTab = pagerState.currentPage }
 
-    // Swipe down to dismiss logic: progressive drag with snapping and animation
     val scope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
-    val dismissThreshold = with(density) { 150.dp.toPx() }
 
-    val dragScope = rememberCoroutineScope()
-    val swipeModifier =
-        Modifier.pointerInput(Unit) {
-            detectVerticalDragGestures(
-                onDragStart = { dragOffset = 0f },
-                onDragEnd = {
-                    if (dragOffset > dismissThreshold) {
-                        // trigger collapse immediately so shared element transition can run
-                        playbackViewModel.setPlayerExpandedState(false)
-                        dragScope.launch {
-                            offsetY.snapTo(0f)
-                            dragOffset = 0f
-                        }
-                    } else {
-                        dragScope.launch {
-                            offsetY.animateTo(0f)
-                            dragOffset = 0f
-                        }
-                    }
-                },
-            ) { change, dragAmount ->
-                change.consume()
-                dragOffset = (dragOffset + dragAmount).coerceAtLeast(0f)
-                dragScope.launch { offsetY.snapTo(dragOffset.coerceAtMost(screenHeightPx)) }
-            }
-        }
+    val density = LocalDensity.current
+    val swipeThreshold = with(density) { 100.dp.toPx() }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
 
     Box(
         modifier =
-            modifier.fillMaxSize().then(swipeModifier).offset {
-                IntOffset(0, offsetY.value.roundToInt())
+            modifier.fillMaxSize().pointerInput(Unit) {
+                detectVerticalDragGestures(
+                    onDragStart = { dragOffset = 0f },
+                    onDragEnd = {
+                        if (dragOffset > swipeThreshold) {
+                            playbackViewModel.togglePlayerExpanded()
+                        }
+                        dragOffset = 0f
+                    },
+                ) { change, dragAmount ->
+                    change.consume()
+                    dragOffset += dragAmount
+                }
             }
     ) {
         // background: album image if available
